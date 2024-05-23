@@ -32,6 +32,7 @@ const swagger = (app: NestExpressApplication) => {
     SwaggerModule.setup('/api/:version?/docs', app, document, {
       patchDocumentOnRequest: (req, _res, document) => {
         const copyDocument = JSON.parse(JSON.stringify(document));
+
         const version = (req as any).params.version;
         if (version === undefined) {
           return copyDocument;
@@ -40,7 +41,7 @@ const swagger = (app: NestExpressApplication) => {
         const isValidVersion = /^v(\d+\.)?(\d+\.)?(\*|\d+)$/;
 
         if (!version || !isValidVersion.test(version)) {
-          return;
+          return copyDocument;
         }
         document.info.version = version.replace('v', '');
         for (const route in document.paths) {
@@ -100,10 +101,11 @@ async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
     const cpus = os.cpus().length;
     process.env.UV_THREADPOOL_SIZE = cpus.toString();
-    swagger(app);
+
     actionGlobal(app);
     security(app);
     configApi(app);
+    swagger(app);
 
     await app.listen(process.env.PORT || 8334);
   } else {
