@@ -1,0 +1,59 @@
+version: "3.7"
+
+services:
+  wms-api:
+    container_name: wms-api
+    restart: always
+    build:
+      context: ../
+      dockerfile: ./.docker/Dockerfile.dev
+    environment:
+      PORT: ${PORT}
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+    ports:
+      - ${PORT}:${PORT}
+
+    volumes:
+      - ../src:/wms-api/src/
+    networks:
+      - wms
+    depends_on:
+      - wms-db
+      - wms-redis
+  wms-redis:
+    container_name: wms-redis
+    image: redis:7-alpine
+
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./.redis/redis.conf:/usr/local/etc/redis/redis.conf
+    restart: always
+    networks:
+      - wms
+    ports:
+      - ${REDIS_PORT}:6379
+  wms-db:
+    container_name: wms-db
+    image: mysql:8.0
+    volumes:
+      - wms-data:/var/lib/mysql
+      - ./.db/mysql/conf.d:/etc/mysql/conf.d
+      - ./.db/mysql/scripts:/docker-entrypoint-initdb.d
+    ports:
+      - ${DATABASE_PORT}:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DATABASE_NAME}
+      MYSQL_USER: ${DATABASE_USER}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+      TZ: Asia/Ho_Chi_Minh
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - wms
+
+networks:
+  wms:
+    driver: bridge
+volumes:
+  wms-data:
