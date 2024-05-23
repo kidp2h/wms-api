@@ -8,6 +8,7 @@ import { RoleModule } from '@/role';
 import { ActionModule } from '@/role/action';
 import { EmployeeModule } from './employee';
 import { ProjectModule } from './project';
+import { LeaveModule } from './project/leave';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ProjectModule } from './project';
     RoleModule,
     EmployeeModule,
     ProjectModule,
+    LeaveModule,
   ],
   providers: [PrismaService],
 })
