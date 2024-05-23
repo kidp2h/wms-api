@@ -4,6 +4,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { RedisModule } from '@nestjs-modules/ioredis';
 
 import { PrismaService } from '@/common/prisma/prisma.service';
+import { RoleModule } from '@/role';
+import { ActionModule } from '@/role/action';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { PrismaService } from '@/common/prisma/prisma.service';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '36000s' },
     }),
+    ActionModule,
+    RoleModule,
   ],
   providers: [PrismaService],
 })
