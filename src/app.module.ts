@@ -4,6 +4,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { RedisModule } from '@nestjs-modules/ioredis';
 
 import { PrismaService } from '@/common/prisma/prisma.service';
+import { RoleModule } from '@/role';
+import { ActionModule } from '@/role/action';
+import { EmployeeModule } from './employee';
+import { ProjectModule } from './project';
+import { LeaveModule } from './project/leave';
 
 @Module({
   imports: [
@@ -24,6 +29,11 @@ import { PrismaService } from '@/common/prisma/prisma.service';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '36000s' },
     }),
+    ActionModule,
+    RoleModule,
+    EmployeeModule,
+    ProjectModule,
+    LeaveModule,
   ],
   providers: [PrismaService],
 })
