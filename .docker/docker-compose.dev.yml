@@ -1,4 +1,4 @@
-version: "3.7"
+version: '3.7'
 
 services:
   wms-api:
@@ -39,7 +39,6 @@ services:
     volumes:
       - wms-data:/var/lib/mysql
       - ./.db/mysql/conf.d:/etc/mysql/conf.d
-      - ./.db/mysql/scripts:/docker-entrypoint-initdb.d
     ports:
       - ${DATABASE_PORT}:3306
     environment:
@@ -47,7 +46,6 @@ services:
       MYSQL_DATABASE: ${DATABASE_NAME}
       MYSQL_USER: ${DATABASE_USER}
       MYSQL_PASSWORD: ${DATABASE_PASSWORD}
-      TZ: Asia/Ho_Chi_Minh
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     networks:
       - wms
