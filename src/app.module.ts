@@ -7,6 +7,7 @@ import { PrismaService } from '@/common/prisma/prisma.service';
 import { RoleModule } from '@/role';
 import { ActionModule } from '@/role/action';
 import { EmployeeModule } from './employee';
+import { ProjectModule } from './project';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { EmployeeModule } from './employee';
     ActionModule,
     RoleModule,
     EmployeeModule,
+    ProjectModule,
   ],
   providers: [PrismaService],
 })
