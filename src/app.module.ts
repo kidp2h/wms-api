@@ -6,6 +6,7 @@ import { RedisModule } from '@nestjs-modules/ioredis';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { RoleModule } from '@/role';
 import { ActionModule } from '@/role/action';
+import { EmployeeModule } from './employee';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ActionModule } from '@/role/action';
     }),
     ActionModule,
     RoleModule,
+    EmployeeModule,
   ],
   providers: [PrismaService],
 })
