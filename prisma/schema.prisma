@@ -1,0 +1,201 @@
+//
+// base.prisma
+//
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+generator prismaClassGenerator {
+  provider = "prisma-class-generator"
+  output = "../src/.gen/prisma-class"
+  dryRun = "false"
+  separateRelationFields = "false"
+}
+
+generator nestjsDto {
+  provider                        = "prisma-generator-nestjs-dto"
+  output                          = "../src/.gen/dto"
+  outputToNestJsResourceStructure = "false"
+  exportRelationModifierClasses   = "true"
+  reExport                        = "false"
+  createDtoPrefix                 = "Create"
+  updateDtoPrefix                 = "Update"
+  classValidation = "true"
+  prettier = "true"
+  dtoSuffix                       = "Dto"
+  entityPrefix                    = ""
+  entitySuffix                    = ""
+  fileNamingStyle                 = "camel"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Employee {
+
+  id              String            @id @default(uuid())
+  code            String            @unique
+  /// @IsEmail
+  email           String            @unique
+  /// @minimum 6
+  password        String
+  fullname        String
+  /// @DtoRelationRequired
+  /// @DtoRelationCanCreateOnCreate
+  /// @DtoRelationCanConnectOnUpdate
+  role            Role @relation(fields: [roleId], references: [id])
+  /// @IsUUID
+  roleId          String
+
+  leaves          EmployeeLeave[]
+
+  projects        EmployeeProject[]
+}
+
+
+model Project {
+  id          String          @id @default(uuid())
+  code        String          @unique
+  name        String
+  description String?
+  status      StatusProject
+  /// @DtoRelationCanCreateOnCreate
+  /// @DtoRelationCanCreateOnUpdate
+  employees   EmployeeProject[]
+  /// @DtoRelationCanCreateOnCreate
+  /// @DtoRelationCanCreateOnUpdate
+  employeeLeave   EmployeeLeave[]
+  limit       Int
+  /// @DtoRelationCanCreateOnCreate
+  /// @DtoRelationCanCreateOnUpdate
+  leaves       ProjectLeave[]
+  startedAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+}
+
+model EmployeeProject {
+  id         String   @id @default(uuid())
+  /// @DtoRelationCanConnectOnCreate
+  /// @DtoRelationCanConnectOnUpdate
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  /// @IsUUID
+  employeeId String
+  /// @DtoRelationCanConnectOnCreate
+  /// @DtoRelationCanConnectOnUpdate
+  project    Project  @relation(fields: [projectId], references: [id])
+  /// @IsUUID
+  projectId  String
+  timeEntries TimeEntry[]
+  @@unique([employeeId, projectId])
+
+}
+
+
+model EmployeeLeave {
+  id        String   @id @default(uuid())
+  /// @DtoRelationCanConnectOnCreate
+  /// @DtoRelationCanConnectOnUpdate
+  employee  Employee @relation(fields: [employeeId], references: [id])
+  /// @IsUUID
+  employeeId String
+  /// @DtoRelationCanConnectOnCreate
+  /// @DtoRelationCanConnectOnUpdate
+  project   Project  @relation(fields: [projectId], references: [id])
+  /// @IsUUID
+  projectId String
+
+  date      DateTime
+
+}
+
+model Leave {
+  id        String    @id @default(uuid())
+  name      String
+  max       Int
+  type      TypeLeave
+  projects  ProjectLeave[]
+  @@unique([name, type])
+
+}
+
+model ProjectLeave {
+  id        String   @id @default(uuid())
+  project   Project  @relation(fields: [projectId], references: [id])
+  /// @IsUUID
+  projectId String
+  /// @DtoRelationCanCreateOnCreate
+  leave     Leave    @relation(fields: [leaveId], references: [id])
+  /// @IsUUID
+  leaveId   String
+
+  @@unique([projectId, leaveId])
+
+}
+
+enum TypeLeave {
+  SICK
+  VACATION
+  CLASS_SCHEDULE
+  INTERN
+}
+
+
+
+model TimeEntry {
+  id                 String          @id @default(uuid())
+  date               DateTime
+  hours              Int
+  overtime           Int
+  employeeProject    EmployeeProject @relation(fields: [employeeProjectId], references: [id])
+  /// @IsUUID
+  employeeProjectId  String
+}
+
+
+
+
+model Action {
+  id      String     @id @default(uuid())
+  code    String
+  service String
+  type    TypeAction
+  role    Role?      @relation(fields: [roleId], references: [id])
+  /// @IsUUID
+  roleId  String?
+
+  @@unique([code, service, type])
+}
+
+enum TypeAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+}
+
+model Role {
+  id      String   @id @default(uuid())
+  code    String   @unique
+  name    String
+  /// @DtoRelationRequired
+  /// @DtoRelationCanConnectOnCreate
+  /// @DtoRelationCanCreateOnCreate
+  /// @DtoRelationCanCreateOnUpdate
+  actions Action[]
+  /// @DtoRelationRequired
+  /// @DtoRelationCanConnectOnCreate
+  /// @DtoRelationCanConnectUpdate
+  employees Employee[]
+}
+
+
+enum StatusProject {
+  NOT_STARTED
+  ONGOING
+  COMPLETED
+}
