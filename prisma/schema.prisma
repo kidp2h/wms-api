@@ -42,13 +42,13 @@ model Employee {
   /// @IsEmail
   email           String            @unique
   /// @minimum 6
-  /// @DtoApiHidden
+  /// @DtoEntityHidden
   password        String
   fullname        String
   /// @DtoRelationRequired
   /// @DtoRelationCanCreateOnCreate
+  /// @DtoRelationCanConnectOnCreate
   /// @DtoRelationCanConnectOnUpdate
-
   role            Role @relation(fields: [roleId], references: [id])
   /// @IsUUID
   roleId          String
