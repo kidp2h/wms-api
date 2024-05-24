@@ -19,13 +19,14 @@ generator nestjsDto {
   output                          = "../src/.gen/dto"
   outputToNestJsResourceStructure = "false"
   exportRelationModifierClasses   = "true"
-  reExport                        = "false"
+  reExport                        = "true"
   createDtoPrefix                 = "Create"
   updateDtoPrefix                 = "Update"
   classValidation = "true"
   prettier = "true"
   dtoSuffix                       = "Dto"
   entityPrefix                    = ""
+  requiredResponseApiProperty = "false"
   entitySuffix                    = ""
   fileNamingStyle                 = "camel"
 }
@@ -36,17 +37,18 @@ datasource db {
 }
 
 model Employee {
-
   id              String            @id @default(uuid())
   code            String            @unique
   /// @IsEmail
   email           String            @unique
   /// @minimum 6
+  /// @DtoApiHidden
   password        String
   fullname        String
   /// @DtoRelationRequired
   /// @DtoRelationCanCreateOnCreate
   /// @DtoRelationCanConnectOnUpdate
+
   role            Role @relation(fields: [roleId], references: [id])
   /// @IsUUID
   roleId          String

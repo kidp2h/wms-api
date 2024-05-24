@@ -14,7 +14,7 @@ import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 export function BaseController<T, TFilter, TCreate, TUpdate>(
   name: string,
   refEntity: Type<T>,
-  refFilterDto: Type<TFilter>,
+  refFilterDto: Type<Partial<TFilter>>,
   refCreateDto: Type<TCreate>,
   refUpdateDto: Type<TUpdate>,
 ): any {
@@ -30,7 +30,7 @@ export function BaseController<T, TFilter, TCreate, TUpdate>(
     }
 
     @Get(`/${name.toLowerCase()}`)
-    @ApiQuery({ name: 'filter', required: true, type: refFilterDto })
+    @ApiQuery({ name: 'filter', required: false, type: refFilterDto })
     findOne(@Query() filter: Partial<TFilter>): Promise<T> {
       return this._service.findOne(filter);
     }
