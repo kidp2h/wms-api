@@ -1,13 +1,15 @@
 import { IRepository, IService } from './types';
 
-export default abstract class BaseService<T, TFilter, TCreate, TUpdate>
-  implements IService<T, TFilter, TCreate, TUpdate>
+export default abstract class Service<
+  T = unknown,
+  TFilter = unknown,
+  TCreate = unknown,
+  TUpdate = unknown,
+> implements IService<T, TFilter, TCreate, TUpdate>
 {
   protected _repository: IRepository<T, TFilter, TCreate, TUpdate>;
 
   findOneById(id: string): Promise<T> {
-    console.log(id);
-
     return this._repository.findOneById(id);
   }
   findOne(filter: Partial<TFilter>): Promise<T> {

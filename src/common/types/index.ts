@@ -4,7 +4,12 @@ export type Action = {
   [K in Prisma.PrismaAction]: (...args: any[]) => any;
 };
 
-export interface IController<T, TFilter, TCreate, TUpdate> {
+export interface IController<
+  T,
+  TFilter = unknown,
+  TCreate = unknown,
+  TUpdate = unknown,
+> {
   findOneById(id: string): Promise<T>;
   findOne(filter: Partial<TFilter>): Promise<T>;
   findMany(filter: Partial<TFilter>): Promise<T[]>;
@@ -15,7 +20,12 @@ export interface IController<T, TFilter, TCreate, TUpdate> {
   remove(id: string): Promise<T>;
 }
 
-export interface IRepository<T, TFilter, TCreate, TUpdate> {
+export interface IRepository<
+  T,
+  TFilter = unknown,
+  TCreate = unknown,
+  TUpdate = unknown,
+> {
   findOneById(id: string): Promise<T>;
   findOne(filter: Partial<TFilter>): Promise<T>;
   findMany(filter: Partial<TFilter>): Promise<T[]>;
@@ -28,7 +38,12 @@ export interface IRepository<T, TFilter, TCreate, TUpdate> {
   isExist(id: string): boolean;
 }
 
-export interface IService<T, TFilter, TCreate, TUpdate> {
+export interface IService<
+  T,
+  TFilter = unknown,
+  TCreate = unknown,
+  TUpdate = unknown,
+> {
   findOneById(id: string): Promise<T>;
   findOne(filter: Partial<TFilter>): Promise<T>;
   findMany(filter: Partial<TFilter>): Promise<T[]>;

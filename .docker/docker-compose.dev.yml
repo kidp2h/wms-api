@@ -1,26 +1,34 @@
-version: "3.7"
+version: '3.7'
 
 services:
   wms-api:
     container_name: wms-api
     restart: always
+
     build:
       context: ../
       dockerfile: ./.docker/Dockerfile.dev
+      args:
+        - PORT=${PORT}
+        - NODE_ENV=development
+    command: pnpm start:dev
     environment:
-      PORT: ${PORT}
       DATABASE_URL: ${DATABASE_URL}
       REDIS_URL: ${REDIS_URL}
     ports:
-      - ${PORT}:${PORT}
-
+      - ${PORT}:8334
     volumes:
-      - ../src:/wms-api/src/
+      - ../:/wms-api
+      - ../package.json:/wms-api/package.json
+      - ../pnpm-lock.yaml:/wms-api/pnpm-lock.yaml
     networks:
       - wms
     depends_on:
-      - wms-db
-      - wms-redis
+      wms-redis:
+        condition: service_healthy
+      wms-db:
+        condition: service_healthy
+
   wms-redis:
     container_name: wms-redis
     image: redis:7-alpine
@@ -31,6 +39,11 @@ services:
     restart: always
     networks:
       - wms
+    healthcheck:
+      test: ['CMD-SHELL', 'redis-cli ping | grep PONG']
+      timeout: 20s
+      interval: 10s
+      retries: 10
     ports:
       - ${REDIS_PORT}:6379
   wms-db:
@@ -39,7 +52,6 @@ services:
     volumes:
       - wms-data:/var/lib/mysql
       - ./.db/mysql/conf.d:/etc/mysql/conf.d
-      - ./.db/mysql/scripts:/docker-entrypoint-initdb.d
     ports:
       - ${DATABASE_PORT}:3306
     environment:
@@ -47,8 +59,12 @@ services:
       MYSQL_DATABASE: ${DATABASE_NAME}
       MYSQL_USER: ${DATABASE_USER}
       MYSQL_PASSWORD: ${DATABASE_PASSWORD}
-      TZ: Asia/Ho_Chi_Minh
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      timeout: 20s
+      interval: 10s
+      retries: 10
     networks:
       - wms
 
