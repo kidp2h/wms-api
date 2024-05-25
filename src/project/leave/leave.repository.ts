@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import BaseRepository from '@/common/base.repository';
 
@@ -7,6 +7,8 @@ import { Leave } from '@/.gen/prisma-class/leave';
 import { CreateLeaveDto } from '@/.gen/dto/create-leave.dto';
 import { LeaveDto } from '@/.gen/dto/leave.dto';
 import { UpdateLeaveDto } from '@/.gen/dto/update-leave.dto';
+import { PrismaClient } from '@prisma/client';
+import { Action } from '@/common/types';
 
 @Injectable()
 export class LeaveRepository extends BaseRepository<
@@ -15,14 +17,13 @@ export class LeaveRepository extends BaseRepository<
   CreateLeaveDto,
   UpdateLeaveDto
 > {
-  constructor(private prisma: PrismaService) {
-    super({
+  constructor(@Inject(PrismaService) private prisma: PrismaClient) {
+    super(prisma.leave as unknown as Action, {
       include: {
         employees: true,
         employeeLeave: true,
         leaves: true,
       },
     });
-    this._model = this.prisma.leave as any;
   }
 }

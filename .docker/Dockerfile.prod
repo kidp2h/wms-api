@@ -1,6 +1,15 @@
 FROM node:20-alpine
-ENV NODE_ENV=production
+ARG NODE_ENV=production
+ENV NODE_ENV=$NODE_ENV
+ARG PORT=8334
+ENV PORT $PORT
+RUN npm install -g pnpm@latest
+USER node
 WORKDIR /wms-api
-COPY ./wms-ap .
-RUN npx rimraf ./dist && pnpm install
+COPY --chown=node:node package.json pnpm-lock.yaml* ./
+RUN npm install
+COPY --chown=node:node . .
+RUN npm run prisma:generate
+RUN npm run build
 CMD ["pnpm", "start:prod"]
+EXPOSE $PORT

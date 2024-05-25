@@ -1,12 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import BaseRepository from '@/common/base.repository';
 
-import { PrismaService } from '@/common/prisma/prisma.service';
-import { Action } from '@/.gen/prisma-class/action';
 import { CreateActionDto } from '@/.gen/dto/create-action.dto';
 import { ActionDto } from '@/.gen/dto/action.dto';
 import { UpdateActionDto } from '@/.gen/dto/update-action.dto';
+import { PrismaClient } from '@prisma/client';
+import { Action as _ } from '@/common/types';
+import { Action } from '@/.gen/prisma-class/action';
+import { PrismaService } from '@/common/prisma/prisma.service';
 
 @Injectable()
 export class ActionRepository extends BaseRepository<
@@ -15,8 +17,7 @@ export class ActionRepository extends BaseRepository<
   CreateActionDto,
   UpdateActionDto
 > {
-  constructor(private prisma: PrismaService) {
-    super({});
-    this._model = this.prisma.action as any;
+  constructor(@Inject(PrismaService) private prisma: PrismaClient) {
+    super(prisma.action as unknown as _, {});
   }
 }

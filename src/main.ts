@@ -1,11 +1,11 @@
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import bodyParser from 'body-parser';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import os from 'os';
+import express from 'express';
 
 import { PrismaExceptionFilter } from '@/common/exceptions/PrismaExceptionFilter';
 
@@ -15,6 +15,7 @@ import {
   SwaggerDocumentOptions,
   SwaggerModule,
 } from '@nestjs/swagger';
+import { log } from 'console';
 
 const swagger = (app: NestExpressApplication) => {
   if (process.env.NODE_ENV === 'development') {
@@ -84,12 +85,16 @@ const security = (app: NestExpressApplication) => {
 const configApi = (app: NestExpressApplication) => {
   app.use(compression());
 
-  bodyParser.urlencoded({ extended: false });
+  // bodyParser.urlencoded({ extended: false });
 
-  app.use(bodyParser.json({ limit: '200mb' }));
+  // app.use(bodyParser.json({ limit: '200mb' }));
 
-  app.use(bodyParser.urlencoded({ limit: '200mb', extended: true }));
-  app.use(bodyParser.text({ limit: '200mb' }));
+  // app.use(bodyParser.urlencoded({ limit: '200mb', extended: true }));
+  // app.use(bodyParser.text({ limit: '200mb' }));
+  app.use(express.json({ limit: '200mb' }));
+  app.use(express.urlencoded({ limit: '200mb', extended: true }));
+  app.use(express.text({ limit: '200mb' }));
+  app.use(express.raw({ limit: '200mb' }));
   app.use(cookieParser());
   app.enableVersioning({
     type: VersioningType.URI,
@@ -106,7 +111,10 @@ async function bootstrap() {
     security(app);
     configApi(app);
     swagger(app);
-
+    Logger.log(
+      `Server running on http://localhost:${process.env.PORT}`,
+      'Bootstrap',
+    );
     await app.listen(process.env.PORT || 8334);
   } else {
     throw Error('Environment variables not found.');

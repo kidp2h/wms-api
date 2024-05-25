@@ -9,6 +9,8 @@ import { ActionModule } from '@/role/action';
 import { EmployeeModule } from './employee';
 import { ProjectModule } from './project';
 import { LeaveModule } from './project/leave';
+import { PrismaModule } from './common/prisma/prisma.module';
+import { PrismaClient } from '@prisma/client';
 
 @Module({
   imports: [
@@ -29,12 +31,12 @@ import { LeaveModule } from './project/leave';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '36000s' },
     }),
+    PrismaModule,
     ActionModule,
     RoleModule,
     EmployeeModule,
     ProjectModule,
     LeaveModule,
   ],
-  providers: [PrismaService],
 })
 export class AppModule {}

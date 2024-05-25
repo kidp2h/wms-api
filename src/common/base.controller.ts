@@ -11,19 +11,22 @@ import {
 import { IController, IService } from './types';
 import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 
-export function BaseController<T, TFilter, TCreate, TUpdate>(
-  name: string,
+export function BaseController<
+  T,
+  TFilter = unknown,
+  TCreate = unknown,
+  TUpdate = unknown,
+>(
   refEntity: Type<T>,
-  refFilterDto: Type<Partial<TFilter>>,
+  refFilterDto: Type<TFilter>,
   refCreateDto: Type<TCreate>,
   refUpdateDto: Type<TUpdate>,
+  _name?: string,
 ): any {
+  const name = _name || refEntity.name.toUpperCase();
   @ApiTags(name.toUpperCase())
-  abstract class _BaseController
-    implements IController<T, TFilter, TCreate, TUpdate>
-  {
-    protected _service: IService<T, TFilter, TCreate, TUpdate>;
-
+  abstract class Controller implements IController<T> {
+    constructor(private _service: IService<T, TFilter, TCreate, TUpdate>) {}
     @Get(`/${name.toLowerCase()}/:id`)
     findOneById(@Param('id') id: string): any {
       return this._service.findOneById(id);
@@ -63,5 +66,5 @@ export function BaseController<T, TFilter, TCreate, TUpdate>(
       return this._service.update(id, item);
     }
   }
-  return _BaseController;
+  return Controller;
 }
