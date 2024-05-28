@@ -1,7 +1,11 @@
-import { PickType } from '@nestjs/mapped-types';
-import { Employee } from '@/.gen/prisma-class/employee';
+import { ApiProperty } from '@nestjs/swagger';
+import { Min } from 'class-validator';
 
-export class AuthDto extends PickType(Employee, [
-  'code',
-  'password',
-] as const) {}
+export class AuthDto {
+  @ApiProperty({ type: String, required: true, default: 'E000001' })
+  code: string;
+
+  @ApiProperty({ type: String, required: true, default: 'abcdxyz' })
+  // @Min(6)
+  password: string;
+}

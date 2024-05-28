@@ -1,18 +1,21 @@
 import { BaseController } from '@/common/base.controller';
 // import { UpdateEmployeeDto } from './employee.dto';
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { CreateEmployeeDto } from '@/.gen/dto/create-employee.dto';
 import { EmployeeDto } from '@/.gen/dto/employee.dto';
 import { Employee } from '@/.gen/dto/employee.entity';
 import { UpdateEmployeeDto } from '@/.gen/dto/update-employee.dto';
 import Service from '@/common/base.service';
+import { AuthGuard } from '@/auth/guards/auth.guard';
 
 @Controller()
+@UseGuards(AuthGuard)
 export class EmployeeController extends BaseController<Employee>(
   Employee,
   EmployeeDto,
   CreateEmployeeDto,
   UpdateEmployeeDto,
+  true,
 ) {
   constructor(private readonly employeeService: Service) {
     super(employeeService);

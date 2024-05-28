@@ -18,9 +18,7 @@ export class EmployeeRepository extends BaseRepository<
 > {
   constructor(@Inject(PrismaService) private prisma: PrismaClient) {
     super(prisma.employee as unknown as Action, {
-      include: {
-        role: true,
-      },
+      include: {},
     });
   }
 }

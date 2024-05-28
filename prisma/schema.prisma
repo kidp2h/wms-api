@@ -45,17 +45,8 @@ model Employee {
   /// @DtoEntityHidden
   password        String
   fullname        String
-  /// @DtoRelationRequired
-  /// @DtoRelationCanCreateOnCreate
-  /// @DtoRelationCanConnectOnCreate
-  /// @DtoRelationCanConnectOnUpdate
-  role            Role @relation(fields: [roleId], references: [id])
-  /// @IsUUID
-  roleId          String
-
-  leaves          EmployeeLeave[]
-
-  projects        EmployeeProject[]
+  role            Role
+  timeEntries     TimeEntryProject[]
 }
 
 
@@ -65,134 +56,38 @@ model Project {
   name        String
   description String?
   status      StatusProject
-  /// @DtoRelationCanCreateOnCreate
-  /// @DtoRelationCanCreateOnUpdate
-  employees   EmployeeProject[]
-  /// @DtoRelationCanCreateOnCreate
-  /// @DtoRelationCanCreateOnUpdate
-  employeeLeave   EmployeeLeave[]
+  type        TypeProject
+  typeLeave   TypeLeave?
   limit       Int
-  /// @DtoRelationCanCreateOnCreate
-  /// @DtoRelationCanCreateOnUpdate
-  leaves       ProjectLeave[]
   startedAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
 }
-
-model EmployeeProject {
-  id         String   @id @default(uuid())
-  /// @DtoRelationCanConnectOnCreate
-  /// @DtoRelationCanConnectOnUpdate
-  employee   Employee @relation(fields: [employeeId], references: [id])
-  /// @IsUUID
+model TimeEntryProject {
+  id                 String          @id @default(uuid())
+  date               DateTime
+  hours              Int
+  employee Employee @relation(fields: [employeeId], references: [id])
   employeeId String
-  /// @DtoRelationCanConnectOnCreate
-  /// @DtoRelationCanConnectOnUpdate
-  project    Project  @relation(fields: [projectId], references: [id])
-  /// @IsUUID
-  projectId  String
-  timeEntries TimeEntry[]
-  @@unique([employeeId, projectId])
 
 }
-
-
-model EmployeeLeave {
-  id        String   @id @default(uuid())
-  /// @DtoRelationCanConnectOnCreate
-  /// @DtoRelationCanConnectOnUpdate
-  employee  Employee @relation(fields: [employeeId], references: [id])
-  /// @IsUUID
-  employeeId String
-  /// @DtoRelationCanConnectOnCreate
-  /// @DtoRelationCanConnectOnUpdate
-  project   Project  @relation(fields: [projectId], references: [id])
-  /// @IsUUID
-  projectId String
-
-  date      DateTime
-
+enum TypeProject {
+  LEAVE
+  PROJECT
+  OVERTIME
 }
-
-model Leave {
-  id        String    @id @default(uuid())
-  name      String
-  max       Int
-  type      TypeLeave
-  projects  ProjectLeave[]
-  @@unique([name, type])
-
-}
-
-model ProjectLeave {
-  id        String   @id @default(uuid())
-  project   Project  @relation(fields: [projectId], references: [id])
-  /// @IsUUID
-  projectId String
-  /// @DtoRelationCanCreateOnCreate
-  leave     Leave    @relation(fields: [leaveId], references: [id])
-  /// @IsUUID
-  leaveId   String
-
-  @@unique([projectId, leaveId])
-
-}
-
 enum TypeLeave {
   SICK
+  ANNUAL
   VACATION
   CLASS_SCHEDULE
   INTERN
 }
 
 
-
-model TimeEntry {
-  id                 String          @id @default(uuid())
-  date               DateTime
-  hours              Int
-  overtime           Int
-  employeeProject    EmployeeProject @relation(fields: [employeeProjectId], references: [id])
-  /// @IsUUID
-  employeeProjectId  String
-}
-
-
-
-
-model Action {
-  id      String     @id @default(uuid())
-  code    String
-  service String
-  type    TypeAction
-  role    Role?      @relation(fields: [roleId], references: [id])
-  /// @IsUUID
-  roleId  String?
-
-  @@unique([code, service, type])
-}
-
-enum TypeAction {
-  CREATE
-  READ
-  UPDATE
-  DELETE
-}
-
-model Role {
-  id      String   @id @default(uuid())
-  code    String   @unique
-  name    String
-  /// @DtoRelationRequired
-  /// @DtoRelationCanConnectOnCreate
-  /// @DtoRelationCanCreateOnCreate
-  /// @DtoRelationCanCreateOnUpdate
-  actions Action[]
-  /// @DtoRelationRequired
-  /// @DtoRelationCanConnectOnCreate
-  /// @DtoRelationCanConnectUpdate
-  employees Employee[]
+enum Role {
+  MANAGER
+  EMPLOYEE
 }
 
 

@@ -1,27 +1,38 @@
 import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import os from 'os';
 import express from 'express';
+import { AppModule } from '@/app.module';
+import { PrismaExceptionFilter } from './common/exceptions/PrismaExceptionFilter';
 
-import { PrismaExceptionFilter } from '@/common/exceptions/PrismaExceptionFilter';
-
-import { AppModule } from './app.module';
 import {
   DocumentBuilder,
   SwaggerDocumentOptions,
   SwaggerModule,
 } from '@nestjs/swagger';
-import { log } from 'console';
+import { HttpExceptionFilter } from './common/exceptions/HttpExceptionFilter';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
 const swagger = (app: NestExpressApplication) => {
   if (process.env.NODE_ENV === 'development') {
     const config = new DocumentBuilder()
       .setTitle('API Documentation WMS')
       .setDescription('Version API')
+      .addBearerAuth(
+        {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          name: 'JWT',
+          description: 'Enter JWT token',
+          in: 'header',
+        },
+        'JWT-auth', // This name here is important for matching up with @ApiBearerAuth() in your controller!
+      )
       .setVersion('1.0')
       .build();
     const options: SwaggerDocumentOptions = {
@@ -61,7 +72,8 @@ const swagger = (app: NestExpressApplication) => {
 const actionGlobal = (app: NestExpressApplication) => {
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
-  app.useGlobalFilters(new PrismaExceptionFilter());
+  app.useGlobalInterceptors(new ResponseInterceptor(app.get(Reflector)));
+  app.useGlobalFilters(new PrismaExceptionFilter(), new HttpExceptionFilter());
 };
 
 const security = (app: NestExpressApplication) => {
@@ -103,7 +115,9 @@ const configApi = (app: NestExpressApplication) => {
 };
 async function bootstrap() {
   if (process.env.PORT) {
-    const app = await NestFactory.create<NestExpressApplication>(AppModule);
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+      logger: ['log', 'error', 'warn'],
+    });
     const cpus = os.cpus().length;
     process.env.UV_THREADPOOL_SIZE = cpus.toString();
 
