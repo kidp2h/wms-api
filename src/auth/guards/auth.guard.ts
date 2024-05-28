@@ -1,6 +1,8 @@
+import { HttpExceptionFilter } from '@/common/exceptions/HttpExceptionFilter';
 import {
   CanActivate,
   ExecutionContext,
+  HttpException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -13,6 +15,19 @@ export class AuthGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    return false;
+    const request = context.switchToHttp().getRequest();
+    const { headers } = request;
+    const accessToken = headers?.authorization?.split('Bearer ')[1] || null;
+    console.log(headers);
+
+    if (accessToken) {
+      try {
+        const payload = this.jwtService.verify(accessToken);
+        request.user = payload;
+        return true;
+      } catch (error) {
+        throw new HttpException('Unauthorized', 401);
+      }
+    } else throw new HttpException('Unauthorized', 401);
   }
 }

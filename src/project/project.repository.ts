@@ -19,11 +19,7 @@ export class ProjectRepository extends BaseRepository<
 > {
   constructor(@Inject(PrismaService) private prisma: PrismaClient) {
     super(prisma.project as unknown as Action, {
-      include: {
-        employees: true,
-        employeeLeave: true,
-        leaves: true,
-      },
+      include: {},
     });
   }
 }

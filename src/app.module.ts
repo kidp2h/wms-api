@@ -3,14 +3,10 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { RedisModule } from '@nestjs-modules/ioredis';
 
-import { PrismaService } from '@/common/prisma/prisma.service';
-import { RoleModule } from '@/role';
-import { ActionModule } from '@/role/action';
-import { EmployeeModule } from './employee';
-import { ProjectModule } from './project';
-import { LeaveModule } from './project/leave';
-import { PrismaModule } from './common/prisma/prisma.module';
-import { PrismaClient } from '@prisma/client';
+import { EmployeeModule } from '@/employee';
+import { ProjectModule } from '@/project';
+import { PrismaModule } from '@/common/prisma/prisma.module';
+import { AuthModule } from '@/auth';
 
 @Module({
   imports: [
@@ -32,11 +28,9 @@ import { PrismaClient } from '@prisma/client';
       signOptions: { expiresIn: '36000s' },
     }),
     PrismaModule,
-    ActionModule,
-    RoleModule,
     EmployeeModule,
     ProjectModule,
-    LeaveModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

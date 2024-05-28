@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:20-alpine as api
 
 
 ARG NODE_ENV=development
@@ -15,3 +15,10 @@ COPY --chown=node:node . .
 RUN pnpm install && prisma generate
 CMD ["pnpm", "start:dev"]
 EXPOSE $PORT
+
+
+FROM api as studio
+WORKDIR /wms-studi
+COPY --from=api /wms-api/prisma ./prisma
+CMD ["prisma", "studio"]
+EXPOSE 5555
