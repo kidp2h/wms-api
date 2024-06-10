@@ -25,7 +25,6 @@ import { AuthModule } from '@/auth';
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '36000s' },
     }),
     PrismaModule,
     EmployeeModule,
@@ -33,4 +32,4 @@ import { AuthModule } from '@/auth';
     AuthModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }

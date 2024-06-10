@@ -1,12 +1,11 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import bcrypt from "bcryptjs"
 
 @Injectable()
 export class PrismaService
   extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy
-{
+  implements OnModuleInit, OnModuleDestroy {
   constructor() {
     super({
       log: [
@@ -23,7 +22,10 @@ export class PrismaService
       // console.log(params);
 
       if (params.action == 'create' && params.model == 'Employee') {
+
         const employee = params.args.data;
+
+        console.log(employee);
         const hash = bcrypt.hashSync(employee.password, 10);
         employee.password = hash;
         params.args.data = employee;

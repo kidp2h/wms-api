@@ -8,4 +8,13 @@ export class AuthDto {
   @ApiProperty({ type: String, required: true, default: 'abcdxyz' })
   // @Min(6)
   password: string;
+
+}
+
+export class RefreshDto {
+  @ApiProperty({ type: String, required: true, default: 'abcdxyz' })
+  refreshToken: string;
+
+  @ApiProperty({ type: String, required: true, default: 'abcdxyz' })
+  accessToken: string;
 }
