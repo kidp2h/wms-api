@@ -70,27 +70,30 @@ const swagger = (app: NestExpressApplication) => {
 };
 
 const actionGlobal = (app: NestExpressApplication) => {
+
+  app.useGlobalInterceptors(new ResponseInterceptor(app.get(Reflector)));
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
-  app.useGlobalInterceptors(new ResponseInterceptor(app.get(Reflector)));
   app.useGlobalFilters(new PrismaExceptionFilter(), new HttpExceptionFilter());
 };
 
 const security = (app: NestExpressApplication) => {
-  app.enableCors();
-  app.use(
-    helmet({
-      contentSecurityPolicy:
-        process.env.NODE_ENV === 'production' ? undefined : false,
-      crossOriginEmbedderPolicy:
-        process.env.NODE_ENV === 'production' ? undefined : false,
-    }),
-  );
+  // app.use(
+  //   helmet({
+  //     contentSecurityPolicy:
+  //       process.env.NODE_ENV === 'production' ? undefined : false,
+  //     crossOriginEmbedderPolicy:
+  //       process.env.NODE_ENV === 'production' ? undefined : false,
+  //   }),
+  // );
+
+  app.enableCors({
+    origin: '*',
+    credentials: true,
+  });
   if (process.env.NODE_ENV === 'development') {
-    app.enableCors({
-      origin: '*',
-      credentials: true,
-    });
+  } else {
+    // app.enableCors()
   }
 };
 

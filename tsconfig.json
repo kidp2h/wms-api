@@ -8,6 +8,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
+    "strictPropertyInitialization": false,
     "esModuleInterop": true,
     "target": "ES6",
     "sourceMap": true,

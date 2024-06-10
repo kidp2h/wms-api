@@ -11,14 +11,13 @@ import { Observable } from 'rxjs';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(private readonly jwtService: JwtService) { }
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
     const { headers } = request;
     const accessToken = headers?.authorization?.split('Bearer ')[1] || null;
-    console.log(headers);
 
     if (accessToken) {
       try {

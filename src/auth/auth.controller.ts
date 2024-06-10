@@ -1,15 +1,11 @@
 import {
   Body,
   Controller,
-  HttpException,
   Post,
-  Req,
-  Res,
-  UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthDto } from './auth.dto';
-import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthDto, RefreshDto } from './auth.dto';
+import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Message } from '@/common/decorators/message.decorator';
 
 @Controller({
@@ -17,14 +13,24 @@ import { Message } from '@/common/decorators/message.decorator';
 })
 @ApiTags('auth'.toUpperCase())
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('/login')
   @ApiBody({ required: true, type: AuthDto })
   @ApiResponse({ status: 201, description: 'Authorize Employee' })
   @Message.Success({ message: 'Employee authorized', status: 201 })
   @Message.Error({ message: 'Invalid credentials', status: 401 })
-  async authorize(@Body() credentials: AuthDto) {
+  authorize(@Body() credentials: AuthDto) {
     return this.authService.authorize(credentials);
+  }
+
+
+  @Post('/refresh')
+  @ApiBody({ required: true, type: RefreshDto })
+  @ApiResponse({ status: 201, description: 'Refresh token' })
+  @Message.Success({ message: 'Refresh success', status: 201 })
+  @Message.Error({ message: 'Invalid credentials', status: 401 })
+  refresh(@Body() credentials: RefreshDto) {
+    return this.authService.refresh(credentials);
   }
 }

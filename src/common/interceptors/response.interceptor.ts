@@ -17,13 +17,14 @@ export interface Response<T> {
 
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
-  constructor(private reflector: Reflector) {}
+  constructor(private reflector: Reflector) { }
   intercept(
     context: ExecutionContext,
     next: CallHandler,
   ): Observable<Response<T>> {
     return next.handle().pipe(
       map((data: T) => {
+        console.log(data)
         if (data) {
           const decoratorMessage =
             this.reflector.get<IMessage>(
