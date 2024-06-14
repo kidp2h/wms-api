@@ -70,10 +70,14 @@ const swagger = (app: NestExpressApplication) => {
 };
 
 const actionGlobal = (app: NestExpressApplication) => {
-
   app.useGlobalInterceptors(new ResponseInterceptor(app.get(Reflector)));
   app.setGlobalPrefix('api');
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  );
   app.useGlobalFilters(new PrismaExceptionFilter(), new HttpExceptionFilter());
 };
 

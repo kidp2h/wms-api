@@ -11,7 +11,7 @@ export class AuthService {
   constructor(
     private readonly employeeService: EmployeeService,
     private readonly jwtService: JwtService,
-  ) { }
+  ) {}
 
   async authorize(credentials: AuthDto) {
     this.logger.log(`Authorizing employee ${JSON.stringify(credentials)}`);
@@ -26,29 +26,34 @@ export class AuthService {
           employee.password,
         );
         if (isPasswordValid) {
-
           const [accessToken, refreshToken] = await Promise.all([
-            this.jwtService.signAsync({
-              sub: employee.id,
-              employee,
-            }, {
-              expiresIn: '15s'
-            }),
-            this.jwtService.signAsync({
-              sub: employee.id,
-              employee
-            }, {
-              expiresIn: '7d'
-            })
-
-          ])
+            this.jwtService.signAsync(
+              {
+                sub: employee.id,
+                employee,
+              },
+              {
+                // expiresIn: '15s',
+                expiresIn: '10000000d',
+              },
+            ),
+            this.jwtService.signAsync(
+              {
+                sub: employee.id,
+                employee,
+              },
+              {
+                expiresIn: '7d',
+              },
+            ),
+          ]);
           return {
             accessToken,
-            refreshToken
-          }
+            refreshToken,
+          };
         } else {
-          this.logger.log('Invalid password')
-          return null
+          this.logger.log('Invalid password');
+          return null;
         }
       } catch (error) {
         this.logger.log(`Error authorizing employee: ${error.message}`);
@@ -62,28 +67,29 @@ export class AuthService {
     try {
       const payload = this.jwtService.verify(refreshToken);
       if (payload) {
-
         const employee = await this.employeeService.findOne({
           id: payload.sub,
         });
-        const accessToken = this.jwtService.sign({
-          sub: employee.id,
-          employee,
-        }, {
-          expiresIn: '15s'
-        });
+        const accessToken = this.jwtService.sign(
+          {
+            sub: employee.id,
+            employee,
+          },
+          {
+            expiresIn: '10000000d',
+            // expiresIn: '15s',
+          },
+        );
 
         return {
-          accessToken
-        }
+          accessToken,
+        };
       } else {
-        return null
+        return null;
       }
     } catch (error) {
-      this.logger.log(error)
+      this.logger.log(error);
       throw new HttpException('Unauthorized', 401);
     }
-
   }
-
 }

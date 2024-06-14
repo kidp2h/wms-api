@@ -5,14 +5,20 @@ import { EmployeeController } from './employee.controller';
 import { EmployeeRepository } from './employee.repository';
 import { PrismaModule } from '@/common/prisma/prisma.module';
 import Service from '@/common/base.service';
+import { TimeEntryProject, Employee } from '@/.gen/dto';
+import {
+  TimeEntryModule,
+  TimeEntryService,
+  ITimeEntryService,
+} from '@/time-entry';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, TimeEntryModule],
   controllers: [EmployeeController],
   providers: [
     EmployeeService,
     {
-      provide: Service,
+      provide: Service<Employee>,
       useClass: EmployeeService,
     },
     EmployeeRepository,

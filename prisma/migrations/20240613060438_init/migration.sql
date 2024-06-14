@@ -32,12 +32,16 @@ CREATE TABLE `Project` (
 -- CreateTable
 CREATE TABLE `TimeEntryProject` (
     `id` VARCHAR(191) NOT NULL,
-    `date` DATETIME(3) NOT NULL,
+    `date` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `hours` INTEGER NOT NULL,
     `employeeId` VARCHAR(191) NOT NULL,
+    `projectId` VARCHAR(191) NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
 ALTER TABLE `TimeEntryProject` ADD CONSTRAINT `TimeEntryProject_employeeId_fkey` FOREIGN KEY (`employeeId`) REFERENCES `Employee`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `TimeEntryProject` ADD CONSTRAINT `TimeEntryProject_projectId_fkey` FOREIGN KEY (`projectId`) REFERENCES `Project`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

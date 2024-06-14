@@ -7,6 +7,7 @@ import { EmployeeModule } from '@/employee';
 import { ProjectModule } from '@/project';
 import { PrismaModule } from '@/common/prisma/prisma.module';
 import { AuthModule } from '@/auth';
+import { TimeEntryModule } from '@/time-entry';
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { AuthModule } from '@/auth';
     PrismaModule,
     EmployeeModule,
     ProjectModule,
+    TimeEntryModule,
     AuthModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}

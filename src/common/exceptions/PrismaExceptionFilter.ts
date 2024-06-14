@@ -19,8 +19,10 @@ export class PrismaExceptionFilter implements ExceptionFilter {
   ): any {
     this.logger.error(
       'PrismaExceptionFilter',
+      exception,
       `${exception.code} - ${exception?.meta?.modelName} - ${exception?.meta?.cause} `,
     );
+
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     response.status(400).json({

@@ -9,7 +9,7 @@ WORKDIR /wms-api
 COPY --chown=node:node package.json pnpm-lock.yaml* ./
 RUN npm install
 COPY --chown=node:node . .
-RUN npm run prisma:generate && npm 
+RUN npx rimraf dist && npm run prisma:generate && npm
 RUN npm run build
 CMD ["pnpm", "start:prod"]
 EXPOSE $PORT
