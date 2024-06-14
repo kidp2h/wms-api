@@ -7,6 +7,7 @@ import { EmployeeModule } from '@/employee';
 import { ProjectModule } from '@/project';
 import { PrismaModule } from '@/common/prisma/prisma.module';
 import { AuthModule } from '@/auth';
+import { TimeEntryModule } from '@/time-entry';
 
 @Module({
   imports: [
@@ -25,11 +26,11 @@ import { AuthModule } from '@/auth';
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '36000s' },
     }),
     PrismaModule,
     EmployeeModule,
     ProjectModule,
+    TimeEntryModule,
     AuthModule,
   ],
 })

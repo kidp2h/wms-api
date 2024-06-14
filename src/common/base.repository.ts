@@ -16,6 +16,7 @@ export default abstract class Repository<T, TFilter, TCreate, TUpdate>
   findMany(filter: Partial<TFilter>): Promise<T[]> {
     return this._model.findMany({ where: filter });
   }
+
   update(id: string, item: Partial<TUpdate>): Promise<T> {
     return this._model.update({
       where: { id },
@@ -26,12 +27,12 @@ export default abstract class Repository<T, TFilter, TCreate, TUpdate>
     return this._model.create({ data: item });
   }
   delete(id: string): Promise<T> {
-    return this._model.update({ where: { id } }, { data: { deletedAt: true } });
+    return this._model.update({ where: { id }, data: { deletedAt: true } });
   }
   remove(id: string): Promise<T> {
     return this._model.delete({ where: { id } });
   }
-  count(filter: Partial<TFilter>): Promise<number> {
+  async count(filter: Partial<TFilter>): Promise<number> {
     return this._model
       .findMany({ where: filter })
       .then((items: T[]) => items.length);
