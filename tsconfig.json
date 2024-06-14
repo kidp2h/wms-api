@@ -23,8 +23,14 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", "**/*.ejs"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.ejs"
+  ]
 }

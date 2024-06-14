@@ -7,11 +7,14 @@ import {
   Put,
   Query,
   Type,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { IController, IService } from './types';
 import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Message } from './decorators/message.decorator';
 import { capitalize } from 'lodash';
+import pluralize from 'pluralize';
 
 export function BaseController<
   T,
@@ -23,29 +26,40 @@ export function BaseController<
   refFilterDto: Type<TFilter>,
   refCreateDto: Type<TCreate>,
   refUpdateDto: Type<TUpdate>,
-  isAuth: boolean = false,
   _name?: string,
+  isAuth: boolean = false,
 ): any {
   const name = _name || refEntity.name.toUpperCase();
+  const endpointPlural = pluralize(name, 2, false).toLowerCase();
+  const endpoint = pluralize(name, 1, false).toLowerCase();
   if (!isAuth) {
     @ApiTags(name.toUpperCase())
     abstract class Controller implements IController<T> {
       constructor(private _service: IService<T, TFilter, TCreate, TUpdate>) {}
-      @Get(`/${name.toLowerCase()}/:id`)
+      @Get(`/${endpoint}/:id`)
       @Message.Success({ message: `${capitalize(name)} found`, status: 201 })
       @Message.Error({ message: `${capitalize(name)} not found`, status: 404 })
       findOneById(@Param('id') id: string): any {
         return this._service.findOneById(id);
       }
 
-      @Get(`/${name.toLowerCase()}`)
+      @Get(`/${endpoint}`)
       @ApiQuery({ name: 'filter', required: false, type: refFilterDto })
+      @UsePipes()
       @Message.Success({ message: `${capitalize(name)} found`, status: 201 })
       @Message.Error({ message: `${capitalize(name)} not found`, status: 201 })
-      findOne(@Query() filter: Partial<TFilter>): Promise<T> {
+      findOne(
+        @Query(
+          new ValidationPipe({
+            transform: true,
+            transformOptions: { enableImplicitConversion: true },
+          }),
+        )
+        filter: Partial<TFilter>,
+      ): Promise<T> {
         return this._service.findOne(filter);
       }
-      @Get(`/${name.toLowerCase()}s`)
+      @Get(`/${endpointPlural}`)
       @ApiQuery({ name: 'filter', required: true, type: refFilterDto })
       @Message.Success({ message: `${capitalize(name)} found`, status: 201 })
       @Message.Error({
@@ -56,7 +70,7 @@ export function BaseController<
         return this._service.findMany(filter);
       }
 
-      @Post(`/${name.toLowerCase()}`)
+      @Post(`/${endpoint}`)
       @ApiBody({ required: true, type: refCreateDto })
       @Message.Success({
         message: `${capitalize(name)} was created!`,
@@ -69,7 +83,7 @@ export function BaseController<
       create(@Body() item: Partial<TCreate>): Promise<T> {
         return this._service.create(item);
       }
-      @Delete(`/${name.toLowerCase()}/delete/:id`)
+      @Delete(`/${endpoint}/delete/:id`)
       @Message.Success({
         message: `${capitalize(name)} was deleted!`,
         status: 201,
@@ -82,7 +96,7 @@ export function BaseController<
         return this._service.delete(id);
       }
 
-      @Delete(`/${name.toLowerCase()}/remove/:id`)
+      @Delete(`/${endpoint}/remove/:id`)
       @Message.Success({
         message: `${capitalize(name)} was removed!`,
         status: 201,
@@ -94,7 +108,7 @@ export function BaseController<
       remove(@Param('id') id: string): Promise<T> {
         return this._service.remove(id);
       }
-      @Put(`/${name.toLowerCase()}/:id`)
+      @Put(`/${endpoint}/:id`)
       @ApiBody({ required: true, type: refUpdateDto })
       @Message.Success({
         message: `${capitalize(name)} was updated!`,
@@ -116,7 +130,7 @@ export function BaseController<
     @ApiTags(name.toUpperCase())
     abstract class ControllerWithAuth implements IController<T> {
       constructor(private _service: IService<T, TFilter, TCreate, TUpdate>) {}
-      @Get(`/${name.toLowerCase()}/:id`)
+      @Get(`/${endpoint}/:id`)
       @Message.Success({ message: `${capitalize(name)} found`, status: 201 })
       @Message.Error({ message: `${capitalize(name)} not found`, status: 404 })
       @ApiBearerAuth('JWT-auth')
@@ -124,7 +138,7 @@ export function BaseController<
         return this._service.findOneById(id);
       }
 
-      @Get(`/${name.toLowerCase()}`)
+      @Get(`/${endpoint}`)
       @ApiQuery({ name: 'filter', required: false, type: refFilterDto })
       @Message.Success({ message: `${capitalize(name)} found`, status: 201 })
       @Message.Error({ message: `${capitalize(name)} not found`, status: 201 })
@@ -132,7 +146,7 @@ export function BaseController<
       findOne(@Query() filter: Partial<TFilter>): Promise<T> {
         return this._service.findOne(filter);
       }
-      @Get(`/${name.toLowerCase()}s`)
+      @Get(`/${endpointPlural}`)
       @ApiQuery({ name: 'filter', required: true, type: refFilterDto })
       @Message.Success({ message: `${capitalize(name)} found`, status: 201 })
       @Message.Error({
@@ -144,7 +158,7 @@ export function BaseController<
         return this._service.findMany(filter);
       }
 
-      @Post(`/${name.toLowerCase()}`)
+      @Post(`/${endpoint}`)
       @ApiBody({ required: true, type: refCreateDto })
       @Message.Success({
         message: `${capitalize(name)} was created!`,
@@ -159,7 +173,7 @@ export function BaseController<
         return this._service.create(item);
       }
 
-      @Delete(`/${name.toLowerCase()}/delete/:id`)
+      @Delete(`/${endpoint}/delete/:id`)
       @Message.Success({
         message: `${capitalize(name)} was deleted!`,
         status: 201,
@@ -173,7 +187,7 @@ export function BaseController<
         return this._service.delete(id);
       }
 
-      @Delete(`/${name.toLowerCase()}/remove/:id`)
+      @Delete(`/${endpoint}/remove/:id`)
       @Message.Success({
         message: `${capitalize(name)} was removed!`,
         status: 201,
@@ -186,7 +200,7 @@ export function BaseController<
       remove(@Param('id') id: string): Promise<T> {
         return this._service.remove(id);
       }
-      @Put(`/${name.toLowerCase()}/:id`)
+      @Put(`/${endpoint}/:id`)
       @ApiBody({ required: true, type: refUpdateDto })
       @Message.Success({
         message: `${capitalize(name)} was updated!`,

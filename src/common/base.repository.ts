@@ -1,11 +1,12 @@
 import { Action, IRepository } from './types';
 
 export default abstract class Repository<T, TFilter, TCreate, TUpdate>
-  implements IRepository<T, TFilter, TCreate, TUpdate> {
+  implements IRepository<T, TFilter, TCreate, TUpdate>
+{
   protected constructor(
     private _model: Action,
     private readonly options: Record<string, any>,
-  ) { }
+  ) {}
   async findOneById(id: string): Promise<T> {
     return this._model.findUnique({ where: { id }, ...this.options });
   }
@@ -15,6 +16,7 @@ export default abstract class Repository<T, TFilter, TCreate, TUpdate>
   findMany(filter: Partial<TFilter>): Promise<T[]> {
     return this._model.findMany({ where: filter });
   }
+
   update(id: string, item: Partial<TUpdate>): Promise<T> {
     return this._model.update({
       where: { id },
