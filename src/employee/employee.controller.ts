@@ -40,8 +40,6 @@ export class EmployeeController extends BaseController<Employee>(
   ) {
     super(employeeService);
   }
-  @Get('/test1')
-  async test() {}
 
   @Put('/employee/time-entries')
   @Message.Success({
@@ -85,7 +83,9 @@ export class EmployeeController extends BaseController<Employee>(
     status: 201,
   })
   @ApiBearerAuth('JWT-auth')
-  findMany(@Authorizer() payload: { sub: string; employee: Employee }) {
+  getTimeEntriesEmployee(
+    @Authorizer() payload: { sub: string; employee: Employee },
+  ) {
     return this.timeEntryService.findMany({
       employeeId: payload.sub,
     });
