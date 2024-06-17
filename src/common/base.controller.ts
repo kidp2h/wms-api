@@ -15,6 +15,7 @@ import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Message } from './decorators/message.decorator';
 import { capitalize } from 'lodash';
 import pluralize from 'pluralize';
+import { map } from '@/utils';
 
 export function BaseController<
   T,

@@ -95,10 +95,10 @@ const security = (app: NestExpressApplication) => {
     origin: '*',
     credentials: true,
   });
-  if (process.env.NODE_ENV === 'development') {
-  } else {
-    // app.enableCors()
-  }
+  // if (process.env.NODE_ENV === 'development') {
+  // } else {
+  //   // app.enableCors()
+  // }
 };
 
 const configApi = (app: NestExpressApplication) => {

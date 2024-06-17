@@ -24,7 +24,12 @@ import { Authorizer } from '@/auth/decorators/authenticator.decorator';
 
 @Controller()
 @UseGuards(AuthGuard)
-export class TimeEntryController extends BaseController<TimeEntryProject>(
+export class TimeEntryController extends BaseController<
+  TimeEntryProject,
+  unknown,
+  unknown,
+  unknown
+>(
   TimeEntryProject,
   TimeEntryProjectDto,
   CreateTimeEntryProjectDto,

@@ -6,6 +6,7 @@ export default abstract class Repository<T, TFilter, TCreate, TUpdate>
   protected constructor(
     private _model: Action,
     private readonly options: Record<string, any>,
+    private readonly map?: (values: any) => T,
   ) {}
   async findOneById(id: string): Promise<T> {
     return this._model.findUnique({ where: { id }, ...this.options });
@@ -24,6 +25,9 @@ export default abstract class Repository<T, TFilter, TCreate, TUpdate>
     });
   }
   create(item: Partial<TCreate>): Promise<T> {
+    if (this.map !== undefined) {
+      return this._model.create({ data: this.map(item) });
+    }
     return this._model.create({ data: item });
   }
   delete(id: string): Promise<T> {

@@ -22,7 +22,10 @@ export class PrismaService
     this.$use(async (params, next) => {
       // console.log(params);
 
-      if (params.action == 'create' && params.model == 'Employee') {
+      if (
+        (params.action == 'create' || params.action.startsWith('update')) &&
+        params.model == 'Employee'
+      ) {
         const employee = params.args.data;
 
         const hash = bcrypt.hashSync(employee.password, 10);
