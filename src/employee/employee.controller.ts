@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Inject,
+  Param,
   Patch,
   Put,
   UseGuards,
@@ -25,7 +26,12 @@ import { ITimeEntryService, TimeEntryService } from '@/time-entry';
 
 @Controller()
 @UseGuards(AuthGuard)
-export class EmployeeController extends BaseController<Employee>(
+export class EmployeeController extends BaseController<
+  Employee,
+  unknown,
+  unknown,
+  unknown
+>(
   Employee,
   EmployeeDto,
   CreateEmployeeDto,
@@ -55,13 +61,21 @@ export class EmployeeController extends BaseController<Employee>(
     @Authorizer() payload: { sub: string; employee: Employee },
     @Body() timeEntries: Partial<TimeEntryProject>[],
   ) {
+    console.log(timeEntries);
+    // return null;
     const timeEntriesUpdate: Partial<TimeEntryProject>[] = [],
       timeEntriesCreate: Partial<TimeEntryProject>[] = [];
     timeEntries.forEach((timeEntry) => {
       if (timeEntry?.id) {
         timeEntriesUpdate.push(timeEntry);
       } else {
-        timeEntriesCreate.push({ ...timeEntry, employeeId: payload.sub });
+        if (timeEntry.employeeId) {
+          timeEntriesCreate.push({
+            ...timeEntry,
+            employeeId: timeEntry.employeeId,
+          });
+        } else
+          timeEntriesCreate.push({ ...timeEntry, employeeId: payload.sub });
       }
     });
 
@@ -73,7 +87,7 @@ export class EmployeeController extends BaseController<Employee>(
     return [...resultUpdate, ...resultCreate];
   }
 
-  @Get('/employee/time-entries')
+  @Get('/employee/time-entries/:id?')
   @Message.Success({
     message: `${capitalize('time-entry')} found`,
     status: 201,
@@ -85,9 +99,15 @@ export class EmployeeController extends BaseController<Employee>(
   @ApiBearerAuth('JWT-auth')
   getTimeEntriesEmployee(
     @Authorizer() payload: { sub: string; employee: Employee },
+    @Param('id') id?: string,
   ) {
-    return this.timeEntryService.findMany({
-      employeeId: payload.sub,
-    });
+    if (id) {
+      return this.timeEntryService.findMany({
+        employeeId: id,
+      });
+    } else
+      return this.timeEntryService.findMany({
+        employeeId: payload.sub,
+      });
   }
 }
