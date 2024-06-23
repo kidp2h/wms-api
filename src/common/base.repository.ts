@@ -15,13 +15,14 @@ export default abstract class Repository<T, TFilter, TCreate, TUpdate>
     return this._model.findFirst({ where: filter, ...this.options });
   }
   findMany(filter: Partial<TFilter>): Promise<T[]> {
-    return this._model.findMany({ where: filter });
+    return this._model.findMany({ where: filter, ...this.options });
   }
 
   update(id: string, item: Partial<TUpdate>): Promise<T> {
     return this._model.update({
       where: { id },
       data: item,
+      ...this.options,
     });
   }
   create(item: Partial<TCreate>): Promise<T> {

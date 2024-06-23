@@ -32,6 +32,8 @@ const main = async () => {
       description: 'CyberSoft',
       status: StatusProject.ONGOING,
       type: TypeProject.PROJECT,
+      startDate: new Date(),
+      endDate: new Date('2030-12-31'),
       typeLeave: null,
       limit: 0,
     },
@@ -45,6 +47,8 @@ const main = async () => {
       status: StatusProject.ONGOING,
       type: TypeProject.LEAVE,
       typeLeave: TypeLeave.VACATION,
+      startDate: new Date(),
+      endDate: new Date('2030-12-31'),
       limit: 12,
     },
   });
@@ -58,6 +62,9 @@ const main = async () => {
       status: StatusProject.ONGOING,
       type: TypeProject.LEAVE,
       typeLeave: TypeLeave.SICK,
+
+      startDate: new Date(),
+      endDate: new Date('2030-12-31'),
       limit: 12,
     },
   });

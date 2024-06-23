@@ -12,6 +12,7 @@ import { TimeEntryProject } from '@/.gen/prisma-class/time_entry_project';
 import { TimeEntryProject as _ } from '@prisma/client';
 import { Action } from '@/common/types';
 import { PrismaClient } from '@prisma/client/extension';
+import { log } from 'console';
 
 @Injectable()
 export class TimeEntryRepository extends BaseRepository<
@@ -22,7 +23,10 @@ export class TimeEntryRepository extends BaseRepository<
 > {
   constructor(@Inject(PrismaService) private prisma: PrismaService) {
     super(prisma.timeEntryProject as unknown as Action, {
-      include: {},
+      include: {
+        employee: true,
+        project: true,
+      },
     });
   }
 
@@ -30,6 +34,7 @@ export class TimeEntryRepository extends BaseRepository<
     timeEntries: Partial<TimeEntryProject>[],
   ): Promise<TimeEntryProject>[] {
     const promises = [];
+    log(timeEntries);
     for (const timeEntry of timeEntries) {
       promises.push(
         this.prisma.timeEntryProject.update({

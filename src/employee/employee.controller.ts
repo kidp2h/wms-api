@@ -10,11 +10,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
-  TimeEntryProject,
   Employee,
   EmployeeDto,
   CreateEmployeeDto,
   UpdateEmployeeDto,
+  TimeEntryProject as _,
 } from '@/.gen/dto/';
 import Service from '@/common/base.service';
 import { AuthGuard } from '@/auth/guards/auth.guard';
@@ -23,8 +23,10 @@ import { Message } from '@/common/decorators/message.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Authorizer } from '@/auth/decorators/authenticator.decorator';
 import { ITimeEntryService, TimeEntryService } from '@/time-entry';
+
+import { TimeEntryProject } from '@/.gen/prisma-class/time_entry_project';
 import { getWeekNumber } from '@/utils/Date';
-import { Role } from '@prisma/client';
+import { Role, TypeProject } from '@prisma/client';
 import { IProjectService, ProjectService } from '@/project';
 
 @Controller()
@@ -66,13 +68,71 @@ export class EmployeeController extends BaseController<
     @Authorizer() payload: { sub: string; employee: Employee },
     @Body() timeEntries: Partial<TimeEntryProject>[],
   ) {
+    const timeEntriesEmployee = (await this.timeEntryService.findMany({
+      employeeId: payload.sub,
+    })) as _[];
+
+    const countLeft: Record<string, Record<string, number>> = {};
+
+    timeEntriesEmployee.forEach((timeEntry) => {
+      if (timeEntry.project?.type === TypeProject.LEAVE) {
+        const year = new Date(timeEntry.date!).getFullYear().toString();
+        Object.assign(countLeft, {
+          ...countLeft,
+          [year]: {
+            ...countLeft[year],
+            [timeEntry.project.code]:
+              (countLeft[year]?.[timeEntry.project.code] || 0) + 1,
+          },
+        });
+      }
+    });
+
+    const countLeave: Record<string, Record<string, number>> = {};
+
     const timeEntriesUpdate: Partial<TimeEntryProject>[] = [],
       timeEntriesCreate: Partial<TimeEntryProject>[] = [];
-    timeEntries.forEach((timeEntry) => {
-      console.log(timeEntry.date);
+    let invalid = false;
+    for (const timeEntry of timeEntries) {
+      const year = new Date(timeEntry.date!).getFullYear().toString();
 
+      if (timeEntry.project?.type === TypeProject.LEAVE) {
+        Object.assign(countLeave, {
+          ...countLeave,
+          [year]: {
+            ...countLeave[year],
+            [timeEntry.project.code]:
+              (countLeave[year]?.[timeEntry.project.code] || 0) + 1,
+          },
+        });
+      }
+
+      if (timeEntry.project?.code) {
+        const left: number = countLeft?.[year]?.[timeEntry.project.code!] || 0;
+        const leave: number =
+          countLeave?.[year]?.[timeEntry.project.code!] || 0;
+
+        console.log(
+          'timeEntry.project.code',
+          year,
+          leave,
+          timeEntry.project.limit!,
+        );
+        if (
+          leave > timeEntry.project.limit! &&
+          payload.employee.role === Role.EMPLOYEE
+        ) {
+          invalid = true;
+          return {
+            data: null,
+            message: `${timeEntry.project.code} đã hết lượt nghỉ phép trong năm ${year}`,
+            status: 400,
+          };
+        }
+      }
       if (timeEntry?.id) {
-        const { date, ...rest } = timeEntry;
+        const { date, employee, project, employeeId, projectId, ...rest } =
+          timeEntry;
         timeEntriesUpdate.push({
           ...rest,
         });
@@ -80,24 +140,35 @@ export class EmployeeController extends BaseController<
         const current = getWeekNumber(new Date())[1];
         const _ = getWeekNumber(new Date(timeEntry.date!))[1];
         if (current !== _ && payload.employee.role !== Role.MANAGER) {
-          return null;
+          invalid = true;
+          break;
         }
 
         if (timeEntry.employeeId) {
           timeEntriesCreate.push({
-            ...timeEntry,
+            projectId: timeEntry.projectId,
+            date: timeEntry.date,
             employeeId: timeEntry.employeeId,
             hours: timeEntry.hours ? timeEntry.hours : 0,
           });
         } else
           timeEntriesCreate.push({
-            ...timeEntry,
+            projectId: timeEntry.projectId,
+
+            date: timeEntry.date,
             employeeId: payload.sub,
             hours: timeEntry.hours ? timeEntry.hours : 0,
           });
       }
-    });
+    }
+    console.log(countLeave);
 
+    if (invalid)
+      return {
+        data: null,
+        message: 'Limit exceeded',
+        status: 400,
+      };
     const [resultUpdate, resultCreate] = await Promise.all([
       this.timeEntryService.updateMany(timeEntriesUpdate),
       this.timeEntryService.createMany(timeEntriesCreate),

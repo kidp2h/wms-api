@@ -7,7 +7,6 @@ import { CreateProjectDto, ProjectDto, UpdateProjectDto } from '@/.gen/dto';
 import { Action } from '@/common/types';
 import { PrismaClient } from '@prisma/client/extension';
 import { Project } from '@/.gen/prisma-class/project';
-import { map } from '@/utils';
 
 @Injectable()
 export class ProjectRepository extends BaseRepository<
