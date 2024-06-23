@@ -1,4 +1,5 @@
 import { HttpExceptionFilter } from '@/common/exceptions/HttpExceptionFilter';
+import { getWeekNumber } from '@/utils/Date';
 import {
   CanActivate,
   ExecutionContext,
@@ -15,6 +16,7 @@ export class AuthGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
+    console.log(getWeekNumber(new Date()));
     const request = context.switchToHttp().getRequest();
     const { headers } = request;
     const accessToken =

@@ -5,8 +5,8 @@ import {
   Get,
   Inject,
   Param,
-  Patch,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -23,6 +23,9 @@ import { Message } from '@/common/decorators/message.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Authorizer } from '@/auth/decorators/authenticator.decorator';
 import { ITimeEntryService, TimeEntryService } from '@/time-entry';
+import { getWeekNumber } from '@/utils/Date';
+import { Role } from '@prisma/client';
+import { IProjectService, ProjectService } from '@/project';
 
 @Controller()
 @UseGuards(AuthGuard)
@@ -41,6 +44,8 @@ export class EmployeeController extends BaseController<
 ) {
   constructor(
     private readonly employeeService: Service<Employee>,
+    @Inject(ProjectService)
+    private readonly projectService: IProjectService,
     @Inject(TimeEntryService)
     private readonly timeEntryService: ITimeEntryService,
   ) {
@@ -61,21 +66,35 @@ export class EmployeeController extends BaseController<
     @Authorizer() payload: { sub: string; employee: Employee },
     @Body() timeEntries: Partial<TimeEntryProject>[],
   ) {
-    console.log(timeEntries);
-    // return null;
     const timeEntriesUpdate: Partial<TimeEntryProject>[] = [],
       timeEntriesCreate: Partial<TimeEntryProject>[] = [];
     timeEntries.forEach((timeEntry) => {
+      console.log(timeEntry.date);
+
       if (timeEntry?.id) {
-        timeEntriesUpdate.push(timeEntry);
+        const { date, ...rest } = timeEntry;
+        timeEntriesUpdate.push({
+          ...rest,
+        });
       } else {
+        const current = getWeekNumber(new Date())[1];
+        const _ = getWeekNumber(new Date(timeEntry.date!))[1];
+        if (current !== _ && payload.employee.role !== Role.MANAGER) {
+          return null;
+        }
+
         if (timeEntry.employeeId) {
           timeEntriesCreate.push({
             ...timeEntry,
             employeeId: timeEntry.employeeId,
+            hours: timeEntry.hours ? timeEntry.hours : 0,
           });
         } else
-          timeEntriesCreate.push({ ...timeEntry, employeeId: payload.sub });
+          timeEntriesCreate.push({
+            ...timeEntry,
+            employeeId: payload.sub,
+            hours: timeEntry.hours ? timeEntry.hours : 0,
+          });
       }
     });
 
@@ -109,5 +128,21 @@ export class EmployeeController extends BaseController<
       return this.timeEntryService.findMany({
         employeeId: payload.sub,
       });
+  }
+  @Get('/employee/project/:id?')
+  @Message.Success({
+    message: `${capitalize('project')} found`,
+    status: 201,
+  })
+  @ApiBearerAuth('JWT-auth')
+  getProjectsEmployee(
+    @Authorizer() payload: { sub: string; employee: Employee },
+    @Query('year') year?: number,
+  ) {
+    const dnow = new Date();
+    return this.projectService.getProjectsByEmployeeId(
+      payload.sub,
+      year || dnow.getFullYear(),
+    );
   }
 }

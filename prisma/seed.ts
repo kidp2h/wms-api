@@ -62,22 +62,11 @@ const main = async () => {
     },
   });
 
-  await prisma.project.create({
-    data: {
-      id: '94d509d7-f976-4306-a2b4-7fb9c8a57751',
-      code: 'OVER_TIME',
-      name: 'Over time',
-      description: 'Over time',
-      status: StatusProject.ONGOING,
-      type: TypeProject.OVERTIME,
-      limit: 0,
-    },
-  });
-
   const timeEntry = await prisma.timeEntryProject.create({
     data: {
       id: 'f2c9b6a8-9e3c-4e8a-8b0d-2c7b3e5e3e3b',
       hours: 8,
+      overtime: 0,
       employeeId: employee.id,
       projectId: project.id,
     },
