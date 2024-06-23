@@ -30,14 +30,17 @@ export class ProjectRepository extends BaseRepository<
       },
     );
   }
-  getProjectsByEmployeeId(
+  async  getProjectsByEmployeeId(
     employeeId: string,
     year: number,
   ): Promise<Project[]> {
+    const map = new Map();
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year + 1, 0, 1);
-    return this.prisma.project.findMany({
+    let a = await this.prisma.project.findMany({
+      
       where: {
+        type : "PROJECT",
         startedAt: {
           gte: startDate,
           lt: endDate,
@@ -49,5 +52,18 @@ export class ProjectRepository extends BaseRepository<
         },
       },
     });
+    return  this.filterUniqueNames(a)
   }
+  private filterUniqueNames(projects: Project[]): Project[] {
+    const map = new Map();
+    return projects.filter((project) => {
+      if (!map.has(project.id)) {
+        map.set(project.id, true);
+        return true;
+      }
+      return false;
+    });
+  }
+
+
 }
