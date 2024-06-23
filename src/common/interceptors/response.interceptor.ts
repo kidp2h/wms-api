@@ -23,7 +23,9 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
     next: CallHandler,
   ): Observable<Response<T>> {
     return next.handle().pipe(
-      map((data: T) => {
+      map((data: any) => {
+        // console.log('interceptor', data);
+
         if (data) {
           const decoratorMessage =
             this.reflector.get<IMessage>(
@@ -33,10 +35,10 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
           context
             .switchToHttp()
             .getResponse()
-            .status(decoratorMessage?.status || 201);
+            .status(data.status || decoratorMessage?.status || 201);
           return {
-            status: decoratorMessage?.status,
-            message: decoratorMessage?.message || null,
+            status: data.status || decoratorMessage?.status,
+            message: data.message || decoratorMessage?.message || null,
             data: data,
           };
         } else {
