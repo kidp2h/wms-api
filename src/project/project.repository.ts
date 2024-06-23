@@ -30,4 +30,24 @@ export class ProjectRepository extends BaseRepository<
       },
     );
   }
+  getProjectsByEmployeeId(
+    employeeId: string,
+    year: number,
+  ): Promise<Project[]> {
+    const startDate = new Date(year, 0, 1);
+    const endDate = new Date(year + 1, 0, 1);
+    return this.prisma.project.findMany({
+      where: {
+        startedAt: {
+          gte: startDate,
+          lt: endDate,
+        },
+        timeEntries: {
+          some: {
+            employeeId: employeeId,
+          },
+        },
+      },
+    });
+  }
 }

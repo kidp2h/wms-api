@@ -69,6 +69,7 @@ model TimeEntryProject {
   date       DateTime @default(now())
   /// @IsInt
   hours      Int
+  overtime    Int @default(0)
   /// @DtoRelationCanConnectOnUpdate
   /// @DtoRelationCanConnectOnCreate
   /// @DtoEntityHidden
