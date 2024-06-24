@@ -18,6 +18,7 @@ import { HttpExceptionFilter } from './common/exceptions/HttpExceptionFilter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
 const swagger = (app: NestExpressApplication) => {
+  console.log(process.env.DATABASE_URL);
   if (process.env.NODE_ENV === 'development') {
     const config = new DocumentBuilder()
       .setTitle('API Documentation WMS')
