@@ -5,10 +5,12 @@ import { UpdateProjectDto, ProjectDto, CreateProjectDto } from '@/.gen/dto';
 import { Project } from '@/.gen/prisma-class/project';
 
 export interface IProjectService extends Service {
+
   getProjectsByEmployeeId(employeeId: string): Promise<Project[]>;
   getProjectsByEmployeeIdWithYear(
     employeeId: string,
     year: number,
+    type:string
   ): Promise<Project[]>;
 }
 @Injectable()
@@ -27,10 +29,13 @@ export class ProjectService
   getProjectsByEmployeeIdWithYear(
     employeeId: string,
     year: number,
+    type:string
   ): Promise<Project[]> {
+
     return this.projectRepository.getProjectsByEmployeeIdWithYear(
       employeeId,
       year,
+      type
     );
   }
 }

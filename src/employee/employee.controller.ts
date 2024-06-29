@@ -190,7 +190,18 @@ export class EmployeeController extends BaseController<
   getTimeEntriesEmployee(
     @Authorizer() payload: { sub: string; employee: Employee },
     @Param('id') id?: string,
+    @Query('type') type?: string,
   ) {
+    if(id ==='{id}') id = undefined;
+    if(!id && type ) {
+      return this.timeEntryService.findMany({
+        employeeId: payload.sub,
+        project: {
+          type: type,
+        },
+      });
+
+    }
     if (id) {
       return this.timeEntryService.findMany({
         employeeId: id,
@@ -207,6 +218,7 @@ export class EmployeeController extends BaseController<
     status: 201,
   })
   @ApiBearerAuth('JWT-auth')
+
   getProjectsEmployee(
     @Authorizer() payload: { sub: string; employee: Employee },
   ) {
@@ -221,12 +233,15 @@ export class EmployeeController extends BaseController<
   getProjectsEmployeeWithYear(
     @Authorizer() payload: { sub: string; employee: Employee },
     @Query('year') year?: number,
+    @Query('type') type?: string,
   ) {
     const dnow = new Date();
+
     if (year) {
       return this.projectService.getProjectsByEmployeeIdWithYear(
         payload.sub,
         year || dnow.getFullYear(),
+        type || 'PROJECT',
       );
     }
   }
