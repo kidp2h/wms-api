@@ -19,6 +19,8 @@ export class AuthService {
     const employee = await this.employeeService.findOne({
       code: credentials.code,
     });
+    console.log(employee);
+
     if (employee) {
       try {
         const isPasswordValid = await bcrypt.compare(

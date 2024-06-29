@@ -28,9 +28,11 @@
       ]
     }
   },
+
   "include": [
     "**/*.ts",
     "**/*.tsx",
     "**/*.ejs"
-  ]
+  ],
+  "exclude": ["./prisma/*.ts"],
 }
