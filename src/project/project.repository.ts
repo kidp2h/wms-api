@@ -34,13 +34,12 @@ export class ProjectRepository extends BaseRepository<
   }
   async getProjectsByEmployeeIdWithYear(
     employeeId: string,
-    year: number,type:string
+    year: number,
   ): Promise<Project[]> {
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year + 1, 0, 1);
     const projects = await this.prisma.project.findMany({
       where: {
-        type : type,
         startedAt: {
           gte: startDate,
           lt: endDate,
@@ -58,7 +57,7 @@ export class ProjectRepository extends BaseRepository<
       },
     });
 
-    const timeEntriesEmployee = projects.forEach((project: Project) => {
+    projects.forEach((project: Project) => {
       project.timeEntries = [
         ...project.timeEntries.filter(
           (timeEntry) => timeEntry.employeeId === employeeId,

@@ -20,7 +20,7 @@ import Service from '@/common/base.service';
 import { AuthGuard } from '@/auth/guards/auth.guard';
 import { capitalize } from 'lodash';
 import { Message } from '@/common/decorators/message.decorator';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { Authorizer } from '@/auth/decorators/authenticator.decorator';
 import { ITimeEntryService, TimeEntryService } from '@/time-entry';
 
@@ -187,21 +187,14 @@ export class EmployeeController extends BaseController<
     status: 201,
   })
   @ApiBearerAuth('JWT-auth')
+  @ApiParam({
+    name: 'id',
+    required: false,
+  })
   getTimeEntriesEmployee(
     @Authorizer() payload: { sub: string; employee: Employee },
     @Param('id') id?: string,
-    @Query('type') type?: string,
   ) {
-    if(id ==='{id}') id = undefined;
-    if(!id && type ) {
-      return this.timeEntryService.findMany({
-        employeeId: payload.sub,
-        project: {
-          type: type,
-        },
-      });
-
-    }
     if (id) {
       return this.timeEntryService.findMany({
         employeeId: id,
@@ -218,7 +211,6 @@ export class EmployeeController extends BaseController<
     status: 201,
   })
   @ApiBearerAuth('JWT-auth')
-
   getProjectsEmployee(
     @Authorizer() payload: { sub: string; employee: Employee },
   ) {
@@ -229,11 +221,15 @@ export class EmployeeController extends BaseController<
     message: `${capitalize('project')} found`,
     status: 201,
   })
+
+  @ApiParam({
+    name: 'year',
+    required: false,
+  })
   @ApiBearerAuth('JWT-auth')
   getProjectsEmployeeWithYear(
     @Authorizer() payload: { sub: string; employee: Employee },
     @Query('year') year?: number,
-    @Query('type') type?: string,
   ) {
     const dnow = new Date();
 
@@ -241,7 +237,6 @@ export class EmployeeController extends BaseController<
       return this.projectService.getProjectsByEmployeeIdWithYear(
         payload.sub,
         year || dnow.getFullYear(),
-        type || 'PROJECT',
       );
     }
   }

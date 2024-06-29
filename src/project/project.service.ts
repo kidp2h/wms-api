@@ -10,7 +10,6 @@ export interface IProjectService extends Service {
   getProjectsByEmployeeIdWithYear(
     employeeId: string,
     year: number,
-    type:string
   ): Promise<Project[]>;
 }
 @Injectable()
@@ -29,13 +28,11 @@ export class ProjectService
   getProjectsByEmployeeIdWithYear(
     employeeId: string,
     year: number,
-    type:string
   ): Promise<Project[]> {
 
     return this.projectRepository.getProjectsByEmployeeIdWithYear(
       employeeId,
       year,
-      type
     );
   }
 }
