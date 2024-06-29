@@ -1,4 +1,10 @@
-import { Action, IRepository } from './types';
+import {
+  Action,
+  IRepository,
+  PaginateDto,
+  PaginateFunction,
+  PaginatedResult,
+} from './types';
 
 export default abstract class Repository<T, TFilter, TCreate, TUpdate>
   implements IRepository<T, TFilter, TCreate, TUpdate>
@@ -25,6 +31,38 @@ export default abstract class Repository<T, TFilter, TCreate, TUpdate>
       ...this.options,
     });
   }
+
+  async findPaginate(
+    filter: Partial<TFilter>,
+    paginate: PaginateDto,
+  ): Promise<PaginatedResult<T>> {
+    const page = Number(paginate?.page || 1) || 1;
+    const perPage = Number(paginate?.perPage || 10) || 10;
+
+    const skip = page > 0 ? perPage * (page - 1) : 0;
+    const [total, data] = await Promise.all([
+      this._model.count({ where: filter || {} }),
+      this._model.findMany({
+        where: filter || {},
+        take: perPage,
+        skip,
+      }),
+    ]);
+    const lastPage = Math.ceil(total / perPage);
+
+    return {
+      result: data,
+      meta: {
+        total,
+        lastPage,
+        currentPage: page,
+        perPage,
+        prev: page > 1 ? page - 1 : null,
+        next: page < lastPage ? page + 1 : null,
+      },
+    };
+  }
+
   create(item: Partial<TCreate>): Promise<T> {
     if (this.map !== undefined) {
       return this._model.create({ data: this.map(item) });

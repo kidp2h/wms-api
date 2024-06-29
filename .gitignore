@@ -39,3 +39,4 @@ lerna-debug.log*
 **/@generated/*
 **/.gen/*
 !**/.gen/.gitkeep
+.vercel
