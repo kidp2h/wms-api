@@ -31,7 +31,7 @@ export class ProjectRepository extends BaseRepository<
   }
   async  getProjectsByEmployeeId(
     employeeId: string,
-    year: number,
+    year: number,type:string
   ): Promise<Project[]> {
     const map = new Map();
     const startDate = new Date(year, 0, 1);
@@ -39,7 +39,7 @@ export class ProjectRepository extends BaseRepository<
     let a = await this.prisma.project.findMany({
       
       where: {
-        type : "PROJECT",
+        type : type,
         startedAt: {
           gte: startDate,
           lt: endDate,
