@@ -211,7 +211,8 @@ export class EmployeeController extends BaseController<
         employeeId: payload.sub,
       });
   }
-  @Get('/employee/project/:id?')
+
+  @Get('/employee/projects')
   @Message.Success({
     message: `${capitalize('project')} found`,
     status: 201,
@@ -220,13 +221,28 @@ export class EmployeeController extends BaseController<
 
   getProjectsEmployee(
     @Authorizer() payload: { sub: string; employee: Employee },
+  ) {
+    return this.projectService.getProjectsByEmployeeId(payload.sub);
+  }
+  @Get('/employee/project/:id?')
+  @Message.Success({
+    message: `${capitalize('project')} found`,
+    status: 201,
+  })
+  @ApiBearerAuth('JWT-auth')
+  getProjectsEmployeeWithYear(
+    @Authorizer() payload: { sub: string; employee: Employee },
     @Query('year') year?: number,
     @Query('type') type?: string,
   ) {
     const dnow = new Date();
-    return this.projectService.getProjectsByEmployeeId(
-      payload.sub,
-      year || dnow.getFullYear(),type || 'PROJECT',
-    );
+
+    if (year) {
+      return this.projectService.getProjectsByEmployeeIdWithYear(
+        payload.sub,
+        year || dnow.getFullYear(),
+        type || 'PROJECT',
+      );
+    }
   }
 }

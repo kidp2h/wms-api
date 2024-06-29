@@ -10,7 +10,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { IController, IService } from './types';
+import { IController, IService, PaginateDto, PaginatedResult } from './types';
 import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Message } from './decorators/message.decorator';
 import { capitalize } from 'lodash';
@@ -71,6 +71,19 @@ export function BaseController<
         return this._service.findMany(filter);
       }
 
+      @Post(`/paginate/${endpointPlural}`)
+      @Message.Success({ message: `${capitalize(name)} found`, status: 201 })
+      @Message.Error({
+        message: `An error occurred while fetching, please try again!`,
+        status: 404,
+      })
+      @ApiBody({ required: false, type: refFilterDto })
+      findPaginate(
+        @Query() paginate: PaginateDto,
+        @Body() filter: Partial<TFilter>,
+      ): Promise<PaginatedResult<T>> {
+        return this._service.findPaginate(filter, paginate);
+      }
       @Post(`/${endpoint}`)
       @ApiBody({ required: true, type: refCreateDto })
       @Message.Success({
@@ -137,6 +150,21 @@ export function BaseController<
       @ApiBearerAuth('JWT-auth')
       findOneById(@Param('id') id: string): any {
         return this._service.findOneById(id);
+      }
+
+      @Post(`/paginate/${endpointPlural}`)
+      @Message.Success({ message: `${capitalize(name)} found`, status: 201 })
+      @Message.Error({
+        message: `An error occurred while fetching, please try again!`,
+        status: 404,
+      })
+      @ApiBody({ required: false, type: refFilterDto })
+      @ApiBearerAuth('JWT-auth')
+      findPaginate(
+        @Query() paginate: PaginateDto,
+        @Body() filter: Partial<TFilter>,
+      ): Promise<PaginatedResult<T>> {
+        return this._service.findPaginate(filter, paginate);
       }
 
       @Get(`/${endpoint}`)

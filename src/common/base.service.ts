@@ -1,4 +1,4 @@
-import { IRepository, IService } from './types';
+import { IRepository, IService, PaginateDto, PaginatedResult } from './types';
 
 export default abstract class Service<
   T = unknown,
@@ -29,5 +29,12 @@ export default abstract class Service<
   }
   remove(id: string): Promise<T> {
     return this._repository.remove(id);
+  }
+
+  findPaginate(
+    filter: Partial<TFilter>,
+    paginate: PaginateDto,
+  ): Promise<PaginatedResult<T>> {
+    return this._repository.findPaginate(filter, paginate);
   }
 }

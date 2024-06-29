@@ -7,6 +7,7 @@ import { CreateProjectDto, ProjectDto, UpdateProjectDto } from '@/.gen/dto';
 import { Action } from '@/common/types';
 import { PrismaClient } from '@prisma/client/extension';
 import { Project } from '@/.gen/prisma-class/project';
+import { TimeEntryProject, TypeProject } from '@prisma/client';
 
 @Injectable()
 export class ProjectRepository extends BaseRepository<
@@ -19,7 +20,9 @@ export class ProjectRepository extends BaseRepository<
     super(
       prisma.project as unknown as Action,
       {
-        include: {},
+        include: {
+          timeEntries: true,
+        },
       },
       (values) => {
         return {
@@ -29,15 +32,13 @@ export class ProjectRepository extends BaseRepository<
       },
     );
   }
-  async  getProjectsByEmployeeId(
+  async getProjectsByEmployeeIdWithYear(
     employeeId: string,
     year: number,type:string
   ): Promise<Project[]> {
-    const map = new Map();
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year + 1, 0, 1);
-    let a = await this.prisma.project.findMany({
-      
+    const projects = await this.prisma.project.findMany({
       where: {
         type : type,
         startedAt: {
@@ -46,12 +47,38 @@ export class ProjectRepository extends BaseRepository<
         },
         timeEntries: {
           some: {
+            employeeId: {
+              equals: employeeId,
+            },
+          },
+        },
+      },
+      include: {
+        timeEntries: true,
+      },
+    });
+
+    const timeEntriesEmployee = projects.forEach((project: Project) => {
+      project.timeEntries = [
+        ...project.timeEntries.filter(
+          (timeEntry) => timeEntry.employeeId === employeeId,
+        ),
+      ];
+    });
+
+    return this.filterUniqueNames(projects);
+  }
+  getProjectsByEmployeeId(employeeId: string) {
+    return this.prisma.project.findMany({
+      where: {
+        type: TypeProject.PROJECT,
+        timeEntries: {
+          some: {
             employeeId: employeeId,
           },
         },
       },
     });
-    return  this.filterUniqueNames(a)
   }
   private filterUniqueNames(projects: Project[]): Project[] {
     const map = new Map();
@@ -63,6 +90,4 @@ export class ProjectRepository extends BaseRepository<
       return false;
     });
   }
-
-
 }

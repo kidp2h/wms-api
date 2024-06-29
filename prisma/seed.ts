@@ -7,6 +7,7 @@ import {
   TypeLeave,
   TypeProject,
 } from '@prisma/client';
+import { randomUUID } from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -14,70 +15,112 @@ const main = async () => {
   await prisma.timeEntryProject.deleteMany({});
   await prisma.employee.deleteMany({});
   await prisma.project.deleteMany({});
-  const employee = await prisma.employee.create({
+  let employees = [];
+  for (let i = 0; i < 50; i++) {
+    employees.push(
+      prisma.employee.create({
+        data: {
+          id: randomUUID(),
+          email: `${faker.internet.email()}`,
+          password: bcrypt.hashSync('1234567', 10),
+          fullname: `${faker.person.firstName()} ${faker.person.lastName()}`,
+          role: Role.EMPLOYEE,
+          code: `E0000${i}`,
+        },
+      }),
+    );
+  }
+  employees = await Promise.all(employees);
+
+  const manager = await prisma.employee.create({
     data: {
-      id: 'c4eb379f-4ddb-4e7a-a39f-d7a94fe361d8',
-      email: 'nthinh.dev@gmail.com',
+      id: randomUUID(),
+      email: `${faker.internet.email()}`,
       password: bcrypt.hashSync('1234567', 10),
-      fullname: 'Nguyen Thanh Hinh',
+      fullname: `${faker.person.firstName()} ${faker.person.lastName()}`,
       role: Role.MANAGER,
-      code: 'M00001',
-    },
-  });
-  const project = await prisma.project.create({
-    data: {
-      id: 'a55f1355-6801-4704-ba61-e8e35130327f',
-      code: 'CYBERSOFT',
-      name: 'CyberSoft',
-      description: 'CyberSoft',
-      status: StatusProject.ONGOING,
-      type: TypeProject.PROJECT,
-      startDate: new Date(),
-      endDate: new Date('2030-12-31'),
-      typeLeave: null,
-      limit: 0,
-    },
-  });
-  await prisma.project.create({
-    data: {
-      id: 'abe207db-8d49-4226-bed9-0bb8e4ecb681',
-      code: 'VACATION_LEAVE',
-      name: 'Nghỉ lễ',
-      description: 'Nghỉ lễ',
-      status: StatusProject.ONGOING,
-      type: TypeProject.LEAVE,
-      typeLeave: TypeLeave.VACATION,
-      startDate: new Date(),
-      endDate: new Date('2030-12-31'),
-      limit: 12,
+      code: `M00001`,
     },
   });
 
-  await prisma.project.create({
-    data: {
-      id: '333cb876-88e5-420a-b99e-c6d378e76c19',
-      code: 'SICK_LEAVE',
-      name: 'Nghỉ bệnh',
-      description: 'Nghỉ bệnh',
-      status: StatusProject.ONGOING,
-      type: TypeProject.LEAVE,
-      typeLeave: TypeLeave.SICK,
+  let projects = [];
 
-      startDate: new Date(),
-      endDate: new Date('2030-12-31'),
-      limit: 12,
-    },
-  });
+  for (let i = 0; i < 5; i++) {
+    projects.push(
+      prisma.project.create({
+        data: {
+          id: randomUUID(),
+          code: 'PROJECT' + i,
+          name: `${faker.company.name()}`,
+          description: 'Project ' + i,
+          status: StatusProject.ONGOING,
+          type: TypeProject.PROJECT,
+          startDate: new Date(),
+          endDate: new Date('2030-12-31'),
+          typeLeave: null,
+          limit: 0,
+        },
+      }),
+    );
+  }
 
-  const timeEntry = await prisma.timeEntryProject.create({
-    data: {
-      id: 'f2c9b6a8-9e3c-4e8a-8b0d-2c7b3e5e3e3b',
-      hours: 8,
-      overtime: 0,
-      employeeId: employee.id,
-      projectId: project.id,
-    },
-  });
+  projects.push(
+    prisma.project.create({
+      data: {
+        id: 'abe207db-8d49-4226-bed9-0bb8e4ecb681',
+        code: 'VACATION_LEAVE',
+        name: 'Nghỉ lễ',
+        description: 'Nghỉ lễ',
+        status: StatusProject.ONGOING,
+        type: TypeProject.LEAVE,
+        typeLeave: TypeLeave.VACATION,
+        startDate: new Date(),
+        endDate: new Date('2030-12-31'),
+        limit: 12,
+      },
+    }),
+  );
+
+  projects.push(
+    prisma.project.create({
+      data: {
+        id: '333cb876-88e5-420a-b99e-c6d378e76c19',
+        code: 'SICK_LEAVE',
+        name: 'Nghỉ bệnh',
+        description: 'Nghỉ bệnh',
+        status: StatusProject.ONGOING,
+        type: TypeProject.LEAVE,
+        typeLeave: TypeLeave.SICK,
+
+        startDate: new Date(),
+        endDate: new Date('2030-12-31'),
+        limit: 12,
+      },
+    }),
+  );
+
+  projects = await Promise.all(projects);
+  const timeEntries = [];
+
+  for (const employee of employees) {
+    for (const project of projects) {
+      if (project.type !== TypeProject.LEAVE) {
+        timeEntries.push(
+          prisma.timeEntryProject.create({
+            data: {
+              id: randomUUID(),
+              employeeId: (employee as any).id,
+              projectId: (project as any).id,
+              date: new Date(),
+              hours: faker.helpers.arrayElement([0, 4, 8]),
+              overtime: faker.helpers.arrayElement([0, 4, 8]),
+            },
+          }),
+        );
+      }
+    }
+  }
+  await Promise.all(timeEntries);
 };
 
 main().catch((err) => {
