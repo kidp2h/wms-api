@@ -229,15 +229,32 @@ export class EmployeeController extends BaseController<
   @ApiBearerAuth('JWT-auth')
   getProjectsEmployeeWithYear(
     @Authorizer() payload: { sub: string; employee: Employee },
+    @Param('id') id?: string,
     @Query('year') year?: number,
   ) {
     const dnow = new Date();
-
+    if (id) {
+      return this.projectService.getProjectsByEmployeeIdWithYear(
+        id,
+        year || dnow.getFullYear(),
+      );
+    } else
     if (year) {
       return this.projectService.getProjectsByEmployeeIdWithYear(
         payload.sub,
         year || dnow.getFullYear(),
       );
     }
+  }
+  @Get('/employee/role')
+  @Message.Success({
+    message: `${capitalize('role')} found`,
+    status: 201,
+  })
+  @ApiBearerAuth('JWT-auth')
+  getEmployee(
+    @Authorizer() payload: { sub: string; employee: Employee },
+  ) {
+    return payload.employee;
   }
 }
