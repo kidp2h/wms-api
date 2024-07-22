@@ -7,12 +7,11 @@ ARG PORT=8334
 ENV PORT $PORT
 RUN npm install -g pnpm@latest
 
-USER node
 WORKDIR /wms-api
-RUN chmod -R 777 /wms-api
-COPY --chown=node:node package.json pnpm-lock.yaml* ./
+# RUN chmod -R 777 /wms-api
+COPY  package.json pnpm-lock.yaml* ./
 ENV PATH /wms-api/node_modules/.bin:$PATH
-COPY --chown=node:node . .
+COPY  . .
 RUN npx rimraf dist && pnpm install && npx prisma generate
 CMD ["pnpm", "start:dev"]
 EXPOSE $PORT

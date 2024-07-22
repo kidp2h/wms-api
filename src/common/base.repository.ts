@@ -1,10 +1,4 @@
-import {
-  Action,
-  IRepository,
-  PaginateDto,
-  PaginateFunction,
-  PaginatedResult,
-} from './types';
+import { Action, IRepository, PaginateDto, PaginatedResult } from './types';
 
 export default abstract class Repository<T, TFilter, TCreate, TUpdate>
   implements IRepository<T, TFilter, TCreate, TUpdate>
@@ -17,6 +11,7 @@ export default abstract class Repository<T, TFilter, TCreate, TUpdate>
   async findOneById(id: string): Promise<T> {
     return this._model.findUnique({ where: { id }, ...this.options });
   }
+
   findOne(filter: Partial<TFilter>): Promise<T> {
     return this._model.findFirst({ where: filter, ...this.options });
   }
