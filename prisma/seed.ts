@@ -1,7 +1,10 @@
 import bcrypt from 'bcryptjs';
 import { faker } from '@faker-js/faker';
 import {
+  Employee,
+  Prisma,
   PrismaClient,
+  Project,
   Role,
   StatusProject,
   TypeLeave,
@@ -15,7 +18,7 @@ const main = async () => {
   await prisma.timeEntryProject.deleteMany({});
   await prisma.employee.deleteMany({});
   await prisma.project.deleteMany({});
-  let employees = [];
+  let employees: Prisma.Prisma__EmployeeClient<Employee>[] = [];
   for (let i = 0; i < 50; i++) {
     employees.push(
       prisma.employee.create({
@@ -30,7 +33,7 @@ const main = async () => {
       }),
     );
   }
-  employees = await Promise.all(employees);
+  employees = (await Promise.all(employees)) as any[];
 
   const manager = await prisma.employee.create({
     data: {
@@ -42,8 +45,9 @@ const main = async () => {
       code: `M00001`,
     },
   });
+  employees.push(manager as any);
 
-  let projects = [];
+  let projects: Prisma.Prisma__ProjectClient<Project>[] = [];
 
   for (let i = 0; i < 5; i++) {
     projects.push(
@@ -51,7 +55,7 @@ const main = async () => {
         data: {
           id: randomUUID(),
           code: 'PROJECT' + i,
-          name: `${faker.company.name()}`,
+          name: `${faker.airline.airport().name} Project`,
           description: 'Project ' + i,
           status: StatusProject.ONGOING,
           type: TypeProject.PROJECT,
@@ -99,24 +103,57 @@ const main = async () => {
     }),
   );
 
-  projects = await Promise.all(projects);
-  const timeEntries = [];
+  projects = (await Promise.all(projects)) as any;
+  const timeEntries: any[] = [];
 
   for (const employee of employees) {
-    for (const project of projects) {
-      if (project.type !== TypeProject.LEAVE) {
-        timeEntries.push(
-          prisma.timeEntryProject.create({
-            data: {
-              id: randomUUID(),
-              employeeId: (employee as any).id,
-              projectId: (project as any).id,
-              date: new Date(),
-              hours: faker.helpers.arrayElement([0, 4, 8]),
-              overtime: faker.helpers.arrayElement([0, 4, 8]),
-            },
-          }),
-        );
+    if (faker.helpers.arrayElement([true, false])) {
+      for (const project of projects) {
+        if ((project as any).type !== TypeProject.LEAVE) {
+          if (faker.helpers.arrayElement([true, false])) {
+            timeEntries.push(
+              prisma.timeEntryProject.create({
+                data: {
+                  id: randomUUID(),
+                  employeeId: (employee as any).id,
+                  projectId: (project as any).id,
+                  date: faker.date.between({
+                    from: '2024-01-01T00:00:00.000Z',
+                    to: '2024-12-31T00:00:00.000Z',
+                  }),
+                  hours: faker.helpers.arrayElement([4, 8]),
+                  overtime: faker.helpers.arrayElement([4, 8]),
+                },
+              }),
+            );
+          }
+        }
+      }
+    } else {
+      for (const employee of employees) {
+        if (faker.helpers.arrayElement([true, false])) {
+          for (const project of projects) {
+            if ((project as any).type !== TypeProject.LEAVE) {
+              if (faker.helpers.arrayElement([true, false])) {
+                timeEntries.push(
+                  prisma.timeEntryProject.create({
+                    data: {
+                      id: randomUUID(),
+                      employeeId: (employee as any).id,
+                      projectId: (project as any).id,
+                      date: faker.date.between({
+                        from: '2024-01-01T00:00:00.000Z',
+                        to: '2024-12-31T00:00:00.000Z',
+                      }),
+                      hours: faker.helpers.arrayElement([4, 8]),
+                      overtime: faker.helpers.arrayElement([4, 8]),
+                    },
+                  }),
+                );
+              }
+            }
+          }
+        }
       }
     }
   }
