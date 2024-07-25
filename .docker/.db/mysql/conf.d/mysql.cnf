@@ -1,5 +1,0 @@
-[mysqld]
-log_error = /var/lib/mysql/mysql_error.log
-default_authentication_plugin = mysql_native_password
-slow_query_log_file = /var/lib/mysql/mysql_slow.log
-

@@ -7,10 +7,10 @@ import Service from '@/common/base.service';
 @Controller()
 export class ProjectController extends BaseController<
   Project,
-  ProjectDto,
-  CreateProjectDto,
-  UpdateProjectDto
->(Project, ProjectDto, CreateProjectDto, UpdateProjectDto) {
+  unknown,
+  unknown,
+  unknown
+>(Project, ProjectDto, CreateProjectDto, UpdateProjectDto, 'project', true) {
   constructor(private readonly projectService: Service<Project>) {
     super(projectService);
   }

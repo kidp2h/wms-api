@@ -83,34 +83,15 @@ const actionGlobal = (app: NestExpressApplication) => {
 };
 
 const security = (app: NestExpressApplication) => {
-  // app.use(
-  //   helmet({
-  //     contentSecurityPolicy:
-  //       process.env.NODE_ENV === 'production' ? undefined : false,
-  //     crossOriginEmbedderPolicy:
-  //       process.env.NODE_ENV === 'production' ? undefined : false,
-  //   }),
-  // );
-
   app.enableCors({
     origin: '*',
     credentials: true,
   });
-  // if (process.env.NODE_ENV === 'development') {
-  // } else {
-  //   // app.enableCors()
-  // }
 };
 
 const configApi = (app: NestExpressApplication) => {
   app.use(compression());
 
-  // bodyParser.urlencoded({ extended: false });
-
-  // app.use(bodyParser.json({ limit: '200mb' }));
-
-  // app.use(bodyParser.urlencoded({ limit: '200mb', extended: true }));
-  // app.use(bodyParser.text({ limit: '200mb' }));
   app.use(express.json({ limit: '200mb' }));
   app.use(express.urlencoded({ limit: '200mb', extended: true }));
   app.use(express.text({ limit: '200mb' }));
@@ -122,24 +103,16 @@ const configApi = (app: NestExpressApplication) => {
   });
 };
 async function bootstrap() {
-  if (process.env.PORT) {
-    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-      logger: ['log', 'error', 'warn'],
-    });
-    const cpus = os.cpus().length;
-    process.env.UV_THREADPOOL_SIZE = cpus.toString();
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: ['log', 'error', 'warn'],
+  });
+  const cpus = os.cpus().length;
+  process.env.UV_THREADPOOL_SIZE = cpus.toString();
 
-    actionGlobal(app);
-    security(app);
-    configApi(app);
-    swagger(app);
-    Logger.log(
-      `Server running on http://localhost:${process.env.PORT}`,
-      'Bootstrap',
-    );
-    await app.listen(process.env.PORT || 8334);
-  } else {
-    throw Error('Environment variables not found.');
-  }
+  actionGlobal(app);
+  security(app);
+  configApi(app);
+  Logger.log(`Server running on http://localhost:8334`, 'Bootstrap');
+  await app.listen(process.env.PORT || 8334);
 }
 bootstrap();

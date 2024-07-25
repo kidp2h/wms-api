@@ -27,6 +27,7 @@ export class PrismaService
         params.model == 'Employee'
       ) {
         const employee = params.args.data;
+        console.log(employee);
 
         const hash = bcrypt.hashSync(employee.password, 10);
         employee.password = hash;

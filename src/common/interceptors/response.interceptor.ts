@@ -35,12 +35,16 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
           context
             .switchToHttp()
             .getResponse()
-            .status(data.status || decoratorMessage?.status || 201);
-          return {
-            status: data.status || decoratorMessage?.status,
-            message: data.message || decoratorMessage?.message || null,
+            .status(decoratorMessage?.status || data.status || 201);
+
+          const x = {
+            status: decoratorMessage?.status || data.status,
+            message: decoratorMessage?.message || data.message || null,
             data: data,
           };
+
+          console.log(x);
+          return x;
         } else {
           const decoratorMessage =
             this.reflector.get<IMessage>(
@@ -51,11 +55,13 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
             .switchToHttp()
             .getResponse()
             .status(decoratorMessage?.status || 404);
-          return {
+          const x = {
             status: decoratorMessage?.status || 404,
             message: decoratorMessage?.message || null,
             data: null,
           };
+          console.log(x);
+          return x;
         }
       }),
     );
