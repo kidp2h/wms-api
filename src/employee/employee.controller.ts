@@ -247,24 +247,11 @@ export class EmployeeController extends BaseController<
         id,
         year || dnow.getFullYear(),
       );
-    } else
-    if (year) {
+    } else if (year) {
       return this.projectService.getProjectsByEmployeeIdWithYear(
         payload.sub,
         year || dnow.getFullYear(),
       );
     }
   }
-  @Get('/employee/role')
-  @Message.Success({
-    message: `${capitalize('role')} found`,
-    status: 201,
-  })
-  @ApiBearerAuth('JWT-auth')
-  getEmployee(
-    @Authorizer() payload: { sub: string; employee: Employee },
-  ) {
-    return payload.employee;
-  }
 }
-t;

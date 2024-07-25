@@ -11,18 +11,6 @@ import { TimeEntryModule } from '@/time-entry';
 
 @Module({
   imports: [
-    RedisModule.forRoot({
-      type: 'single',
-
-      url: process.env.REDIS_URL,
-      options: {
-        connectTimeout: 10000,
-        commandTimeout: 2000,
-      },
-    }),
-    BullModule.forRoot({
-      redis: process.env.REDIS_URL,
-    }),
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,

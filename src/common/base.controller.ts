@@ -15,7 +15,6 @@ import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Message } from './decorators/message.decorator';
 import { capitalize } from 'lodash';
 import pluralize from 'pluralize';
-import { map } from '@/utils';
 
 export function BaseController<
   T,
@@ -198,8 +197,11 @@ export function BaseController<
         message: `An error occurred while creating, please try again!`,
         status: 404,
       })
-      create(@Body() item: Partial<TCreate>): Promise<T> {
-        return this._service.create(item);
+      async create(@Body() item: Partial<TCreate>): Promise<T> {
+        console.log(item);
+        const x = await this._service.create(item);
+        console.log(x);
+        return x;
       }
 
       @Delete(`/${endpoint}/delete/:id`)
